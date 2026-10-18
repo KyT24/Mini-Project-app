@@ -50,7 +50,7 @@ export default function Navbar() {
   function handleLogout() {
     setProfileOpen(false);
     // TODO: hapus sesi/token Anda di sini, lalu arahkan ke login
-    router.push('/user/login');
+    router.push('/login');
   }
 
   return (
@@ -154,7 +154,7 @@ export default function Navbar() {
               >
                 <li role="none">
                   <Link
-                    href="/profil"
+                    href="/user/profile"
                     role="menuitem"
                     onClick={() => setProfileOpen(false)}
                     className="flex items-center justify-between rounded-xl px-4 py-2.5 text-neutral-800 hover:bg-[#1B1B7A]/10 focus-visible:outline-2 focus-visible:outline-[#1B1B7A]"
@@ -189,6 +189,16 @@ export default function Navbar() {
                   role="none"
                   className="mt-1 border-t border-neutral-200 pt-1"
                 >
+                  <Link
+                    href="/login"
+                    role="menuitem"
+                    onClick={() => setProfileOpen(false)}
+                    className="block rounded-xl px-4 py-2.5 font-semibold text-[#1B1B7A] hover:bg-[#1B1B7A]/10 focus-visible:outline-2 focus-visible:outline-[#1B1B7A]"
+                  >
+                    Masuk
+                  </Link>
+                </li>
+                <li role="none">
                   <button
                     type="button"
                     role="menuitem"
