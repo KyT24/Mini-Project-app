@@ -301,7 +301,7 @@ export default function ProfilePage() {
       >
         <div className="mx-auto flex max-w-3xl items-center justify-end gap-4 px-5 md:px-8">
           <Link
-            href="/user/home"
+            href="/"
             className="rounded-md font-semibold text-white/90 underline decoration-[#F29A9A] decoration-2 underline-offset-4 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
             Ke dashboard
