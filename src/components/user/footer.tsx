@@ -8,9 +8,7 @@ export default function Footer() {
       <div className="h-1 bg-[#F29A9A]" />
 
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-12 sm:grid-cols-2 md:px-8 md:py-16 lg:grid-cols-[1.4fr_1fr_1.2fr_1fr]">
-        {/* BRAND + ALAMAT */}
         <section aria-label="Tentang klinik">
-          {/* Simpan logo di public/logo-klinik.png */}
           <Link
             href="/"
             aria-label="Ke beranda"
@@ -35,8 +33,6 @@ export default function Footer() {
             <span className="sr-only"> (membuka tab baru)</span>
           </a>
         </section>
-
-        {/* MENU */}
         <nav aria-label="Menu footer">
           <h2 className="text-lg font-bold">Jelajahi</h2>
           <ul className="mt-4 grid gap-1">
@@ -66,20 +62,18 @@ export default function Footer() {
             </li>
           </ul>
         </nav>
-
-        {/* KONTAK + JAM OPERASIONAL */}
         <section aria-label="Hubungi kami">
           <h2 className="text-lg font-bold">Hubungi kami</h2>
           <ul className="mt-4 grid gap-3 text-white/80">
             <li>
               <a
-                href="https://wa.me/628xxxxxxxxxx"
+                href="https://wa.me/62882019348463"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[#F29A9A] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F29A9A]"
               >
                 <span className="block text-sm">WhatsApp</span>
-                <span className="block font-semibold text-white">0812-xxxx-xxxx</span>
+                <span className="block font-semibold text-white">0882-0193-48463 </span>
                 <span className="sr-only"> (membuka tab baru)</span>
               </a>
             </li>
@@ -105,7 +99,7 @@ export default function Footer() {
           <ul className="mt-4 grid gap-2">
             <li>
               <a
-                href="https://www.instagram.com/akunanda"
+                href="https://www.instagram.com/ianongkoyoyo"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center gap-3 rounded-md py-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F29A9A]"
@@ -126,7 +120,7 @@ export default function Footer() {
             </li>
             <li>
               <a
-                href="https://www.facebook.com/akunanda"
+                href="https://www.facebook.com/IanOngkoyoyo"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center gap-3 rounded-md py-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F29A9A]"
@@ -170,7 +164,7 @@ export default function Footer() {
       {/* BAR BAWAH */}
       <div className="border-t border-white/15">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-5 py-5 text-sm text-white/80 sm:flex-row md:px-8">
-          <p>© {new Date().getFullYear()} Nama Klinik Anda. Semua hak dilindungi.</p>
+          <p>© {new Date().getFullYear()} IH Beauty Clinic</p>
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
