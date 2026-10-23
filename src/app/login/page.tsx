@@ -2,25 +2,32 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import {
+  type FieldErrors,
+  type LoginValues,
+  validateEmail,
+  validateLogin,
+  validateLoginPassword,
+} from '@/lib/validators/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<FieldErrors<LoginValues>>({});
   const [serverError, setServerError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function setFieldError(field: keyof LoginValues, message?: string) {
+    setErrors((prev) => ({ ...prev, [field]: message }));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setServerError('');
 
-    // Validasi sederhana
-    const next: { email?: string; password?: string } = {};
-    if (!email.trim()) next.email = 'Email wajib diisi';
-    else if (!/^\S+@\S+\.\S+$/.test(email)) next.email = 'Format email tidak valid';
-    if (!password) next.password = 'Password wajib diisi';
+    const next = validateLogin({ email, password });
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
@@ -38,7 +45,6 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-neutral-100 text-neutral-900 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      {/* PANEL BRAND */}
       <aside
         className="relative flex flex-col justify-between overflow-hidden bg-[#1B1B7A] px-6 py-10 text-white md:px-12 md:py-14 lg:py-20"
         style={{
@@ -47,13 +53,12 @@ export default function LoginPage() {
         }}
       >
         <div>
-          {/* Ganti dengan logo klinik Anda di public/logo-klinik.png */}
           <Link
             href="/"
             aria-label="Ke beranda"
-            className="inline-block rounded-md bg-white px-3 py-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            className="inline-block rounded-md bg-[#FAF8F3] px-3 py-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
-            <img src="/logo-klinik.png" alt="Logo klinik" className="h-9 w-auto" />
+            <img src="/IH-logo-icon.png" alt="Logo klinik" className="h-9 w-auto" />
           </Link>
 
           <h1 className="mt-10 text-4xl font-bold tracking-tight md:text-5xl">
@@ -64,7 +69,6 @@ export default function LoginPage() {
             reservasi dengan lebih mudah.
           </p>
         </div>
-
         <div
           aria-hidden="true"
           className="mt-10 hidden h-1.5 w-24 rounded-full bg-[#F29A9A] lg:block"
@@ -103,7 +107,11 @@ export default function LoginPage() {
                 autoComplete="email"
                 placeholder="nama@email.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setFieldError('email', validateEmail(e.target.value));
+                }}
+                onBlur={() => setFieldError('email', validateEmail(email))}
                 aria-invalid={!!errors.email}
                 aria-describedby={errors.email ? 'email-error' : undefined}
                 className={`mt-2 w-full rounded-xl border bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 focus-visible:border-[#1B1B7A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] ${
@@ -138,7 +146,12 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   placeholder="Password Anda"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password)
+                      setFieldError('password', validateLoginPassword(e.target.value));
+                  }}
+                  onBlur={() => setFieldError('password', validateLoginPassword(password))}
                   aria-invalid={!!errors.password}
                   aria-describedby={errors.password ? 'password-error' : undefined}
                   className={`w-full rounded-xl border bg-white px-4 py-3 pr-28 text-neutral-900 placeholder:text-neutral-500 focus-visible:border-[#1B1B7A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] ${
@@ -160,17 +173,6 @@ export default function LoginPage() {
                 </p>
               )}
             </div>
-
-            {/* INGAT SAYA */}
-            <label className="flex cursor-pointer items-center gap-3">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="h-5 w-5 rounded border-neutral-300 accent-[#1B1B7A]"
-              />
-              <span>Ingat saya</span>
-            </label>
           </div>
 
           <button

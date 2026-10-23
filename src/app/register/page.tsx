@@ -2,15 +2,19 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import {
+  type FieldErrors,
+  type RegisterValues,
+  validateAgree,
+  validateConfirmPassword,
+  validateEmail,
+  validateName,
+  validateNewPassword,
+  validatePhone,
+  validateRegister,
+} from '@/lib/validators/auth';
 
-type Errors = {
-  name?: string;
-  email?: string;
-  phone?: string;
-  password?: string;
-  confirmPassword?: string;
-  agree?: string;
-};
+type Errors = FieldErrors<RegisterValues>;
 
 const inputBase =
   'w-full rounded-xl border bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 focus-visible:border-[#1B1B7A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A]';
@@ -34,41 +38,42 @@ export default function RegisterPage() {
   const [serverError, setServerError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  function setFieldError(field: keyof RegisterValues, message?: string) {
+    setErrors((prev) => ({ ...prev, [field]: message }));
+  }
+
+  function fieldHandlers<K extends keyof RegisterValues>(
+    field: K,
+    validate: (value: string) => string | undefined,
+    current: string,
+    set: (v: string) => void,
+  ) {
+    return {
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+        set(e.target.value);
+        if (errors[field]) setFieldError(field, validate(e.target.value));
+      },
+      onBlur: () => setFieldError(field, validate(current)),
+    };
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setServerError('');
 
-    // Validasi sederhana
-    const next: Errors = {};
-    if (!name.trim()) next.name = 'Nama lengkap wajib diisi';
-
-    if (!email.trim()) next.email = 'Email wajib diisi';
-    else if (!/^\S+@\S+\.\S+$/.test(email))
-      next.email = 'Format email tidak valid';
-
-    // Nomor Indonesia: 08xx / +628xx / 628xx, 9-13 digit setelah awalan
-    if (!phone.trim()) next.phone = 'Nomor WhatsApp wajib diisi';
-    else if (!/^(\+62|62|0)8\d{8,11}$/.test(phone.replace(/[\s-]/g, '')))
-      next.phone = 'Nomor tidak valid. Contoh: 081234567890';
-
-    if (!password) next.password = 'Password wajib diisi';
-    else if (password.length < 8) next.password = 'Password minimal 8 karakter';
-
-    if (!confirmPassword)
-      next.confirmPassword = 'Konfirmasi password wajib diisi';
-    else if (confirmPassword !== password)
-      next.confirmPassword = 'Password tidak sama';
-
-    if (!agree) next.agree = 'Anda perlu menyetujui syarat dan ketentuan';
-
+    const next = validateRegister({
+      name,
+      email,
+      phone,
+      password,
+      confirmPassword,
+      agree,
+    });
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
     setIsSubmitting(true);
     try {
-      // TODO: panggil API register Anda di sini, contoh:
-      // await register({ name, email, phone, password });
-      // router.push('/login');
     } catch {
       setServerError('Pendaftaran gagal. Silakan coba lagi.');
     } finally {
@@ -87,14 +92,13 @@ export default function RegisterPage() {
         }}
       >
         <div>
-          {/* Ganti dengan logo klinik Anda di public/logo-klinik.png */}
           <Link
             href="/"
             aria-label="Ke beranda"
             className="inline-block rounded-md bg-white px-3 py-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
             <img
-              src="/logo-klinik.png"
+              src="/IH-logo-icon.png"
               alt="Logo klinik"
               className="h-9 w-auto"
             />
@@ -139,7 +143,6 @@ export default function RegisterPage() {
         />
       </aside>
 
-      {/* FORM */}
       <section className="flex items-center justify-center px-5 py-10 md:px-10 md:py-14">
         <form
           onSubmit={handleSubmit}
@@ -178,7 +181,7 @@ export default function RegisterPage() {
                 autoComplete="name"
                 placeholder="Nama sesuai identitas"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...fieldHandlers('name', validateName, name, setName)}
                 aria-invalid={!!errors.name}
                 aria-describedby={errors.name ? 'name-error' : undefined}
                 className={`mt-2 ${inputBase} ${
@@ -211,7 +214,7 @@ export default function RegisterPage() {
                 autoComplete="email"
                 placeholder="nama@email.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...fieldHandlers('email', validateEmail, email, setEmail)}
                 aria-invalid={!!errors.email}
                 aria-describedby={errors.email ? 'email-error' : undefined}
                 className={`mt-2 ${inputBase} ${
@@ -243,9 +246,9 @@ export default function RegisterPage() {
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
-                placeholder="081234567890"
+                placeholder="08xxxxxxxx"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                {...fieldHandlers('phone', validatePhone, phone, setPhone)}
                 aria-invalid={!!errors.phone}
                 aria-describedby={errors.phone ? 'phone-error' : undefined}
                 className={`mt-2 ${inputBase} ${
@@ -279,7 +282,18 @@ export default function RegisterPage() {
                   autoComplete="new-password"
                   placeholder="Minimal 8 karakter"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password)
+                      setFieldError('password', validateNewPassword(e.target.value));
+                    // Sinkronkan konfirmasi bila sudah pernah diisi
+                    if (confirmPassword)
+                      setFieldError(
+                        'confirmPassword',
+                        validateConfirmPassword(confirmPassword, e.target.value),
+                      );
+                  }}
+                  onBlur={() => setFieldError('password', validateNewPassword(password))}
                   aria-invalid={!!errors.password}
                   aria-describedby={
                     errors.password ? 'password-error' : 'password-hint'
@@ -331,7 +345,20 @@ export default function RegisterPage() {
                   autoComplete="new-password"
                   placeholder="Ulangi password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (errors.confirmPassword)
+                      setFieldError(
+                        'confirmPassword',
+                        validateConfirmPassword(e.target.value, password),
+                      );
+                  }}
+                  onBlur={() =>
+                    setFieldError(
+                      'confirmPassword',
+                      validateConfirmPassword(confirmPassword, password),
+                    )
+                  }
                   aria-invalid={!!errors.confirmPassword}
                   aria-describedby={
                     errors.confirmPassword ? 'confirm-error' : undefined
@@ -368,7 +395,10 @@ export default function RegisterPage() {
                 <input
                   type="checkbox"
                   checked={agree}
-                  onChange={(e) => setAgree(e.target.checked)}
+                  onChange={(e) => {
+                    setAgree(e.target.checked);
+                    setFieldError('agree', validateAgree(e.target.checked));
+                  }}
                   aria-invalid={!!errors.agree}
                   aria-describedby={errors.agree ? 'agree-error' : undefined}
                   className="mt-0.5 h-5 w-5 shrink-0 rounded border-neutral-300 accent-[#1B1B7A]"
