@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { getApiErrorMessage, useRegister } from '@/hooks/useAuth';
 import {
   type FieldErrors,
   type RegisterValues,
@@ -11,8 +13,9 @@ import {
   validateName,
   validateNewPassword,
   validatePhone,
-  validateRegister,
-} from '@/lib/validators/auth';
+  registerSchema,
+} from '@/validations/register/register.schema';
+import { toFieldErrors } from '@/validations/shared/fields';
 
 type Errors = FieldErrors<RegisterValues>;
 
@@ -26,6 +29,7 @@ const linkClass =
   'font-semibold text-[#1B1B7A] underline decoration-[#F29A9A] decoration-2 underline-offset-4 hover:text-[#d96a6a] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A]';
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -36,7 +40,14 @@ export default function RegisterPage() {
   const [agree, setAgree] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [serverError, setServerError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { mutate: register, isPending: isSubmitting } = useRegister({
+    onSuccess: () => router.push('/login?registered=1'),
+    onError: (error) =>
+      setServerError(
+        getApiErrorMessage(error, 'Pendaftaran gagal. Silakan coba lagi.'),
+      ),
+  });
 
   function setFieldError(field: keyof RegisterValues, message?: string) {
     setErrors((prev) => ({ ...prev, [field]: message }));
@@ -57,11 +68,11 @@ export default function RegisterPage() {
     };
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setServerError('');
 
-    const next = validateRegister({
+    const parsed = registerSchema.safeParse({
       name,
       email,
       phone,
@@ -69,16 +80,19 @@ export default function RegisterPage() {
       confirmPassword,
       agree,
     });
-    setErrors(next);
-    if (Object.keys(next).length > 0) return;
-
-    setIsSubmitting(true);
-    try {
-    } catch {
-      setServerError('Pendaftaran gagal. Silakan coba lagi.');
-    } finally {
-      setIsSubmitting(false);
+    if (!parsed.success) {
+      setErrors(toFieldErrors<RegisterValues>(parsed.error));
+      return;
     }
+    setErrors({});
+    const data = parsed.data; // sudah di-trim & tervalidasi
+
+    register({
+      full_name: data.name,
+      email: data.email,
+      phone_number: data.phone.replace(/[\s-]/g, ''),
+      password: data.password,
+    });
   }
 
   return (
@@ -285,15 +299,23 @@ export default function RegisterPage() {
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (errors.password)
-                      setFieldError('password', validateNewPassword(e.target.value));
+                      setFieldError(
+                        'password',
+                        validateNewPassword(e.target.value),
+                      );
                     // Sinkronkan konfirmasi bila sudah pernah diisi
                     if (confirmPassword)
                       setFieldError(
                         'confirmPassword',
-                        validateConfirmPassword(confirmPassword, e.target.value),
+                        validateConfirmPassword(
+                          confirmPassword,
+                          e.target.value,
+                        ),
                       );
                   }}
-                  onBlur={() => setFieldError('password', validateNewPassword(password))}
+                  onBlur={() =>
+                    setFieldError('password', validateNewPassword(password))
+                  }
                   aria-invalid={!!errors.password}
                   aria-describedby={
                     errors.password ? 'password-error' : 'password-hint'

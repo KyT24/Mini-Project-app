@@ -1,46 +1,64 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { getApiErrorMessage, useLogin } from '@/hooks/useAuth';
 import {
   type FieldErrors,
   type LoginValues,
+  loginSchema,
   validateEmail,
-  validateLogin,
   validateLoginPassword,
-} from '@/lib/validators/auth';
+} from '@/validations/login/login.schema';
+import { toFieldErrors } from '@/validations/shared/fields';
 
 export default function LoginPage() {
+  // useSearchParams butuh Suspense boundary di App Router
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const justRegistered = searchParams.get('registered') === '1';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [errors, setErrors] = useState<FieldErrors<LoginValues>>({});
   const [serverError, setServerError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { mutate: login, isPending: isSubmitting } = useLogin({
+    onSuccess: ({ data }) => {
+      const role = data.user.role;
+      router.push(role === 'ADMIN' || role === 'STAFF' ? '/admin/dashboard' : '/');
+    },
+    onError: (error) =>
+      setServerError(
+        getApiErrorMessage(error, 'Email atau password salah. Silakan coba lagi.'),
+      ),
+  });
 
   function setFieldError(field: keyof LoginValues, message?: string) {
     setErrors((prev) => ({ ...prev, [field]: message }));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setServerError('');
 
-    const next = validateLogin({ email, password });
-    setErrors(next);
-    if (Object.keys(next).length > 0) return;
-
-    setIsSubmitting(true);
-    try {
-      // TODO: panggil API login Anda di sini, contoh:
-      // await login({ email, password, remember });
-      // router.push('/dashboard');
-    } catch {
-      setServerError('Email atau password salah. Silakan coba lagi.');
-    } finally {
-      setIsSubmitting(false);
+    const parsed = loginSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      setErrors(toFieldErrors<LoginValues>(parsed.error));
+      return;
     }
+    setErrors({});
+    login(parsed.data); // email sudah di-trim oleh zod
   }
 
   return (
@@ -84,6 +102,15 @@ export default function LoginPage() {
         >
           <h2 className="text-2xl font-bold tracking-tight text-[#1B1B7A]">Masuk</h2>
           <p className="mt-1 text-neutral-600">Gunakan akun yang sudah terdaftar.</p>
+
+          {justRegistered && !serverError && (
+            <div
+              role="status"
+              className="mt-5 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-900"
+            >
+              Pendaftaran berhasil. Silakan masuk dengan akun Anda.
+            </div>
+          )}
 
           {serverError && (
             <div
