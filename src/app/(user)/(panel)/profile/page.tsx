@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { getApiErrorMessage, getApiStatus } from '@/components/admin/doctor/utils';
+import { useGetMyPatient, useUpdateMyPatient } from '@/hooks/usePatient';
+import type { TGender, TPatient } from '@/types/patient';
 
 type Profile = {
   name: string;
   email: string;
   phone: string;
-  birthDate: string;
-  gender: string;
+  birthDate: string; // YYYY-MM-DD
+  gender: TGender | '';
   address: string;
 };
 
@@ -35,15 +38,32 @@ const toggleBtn =
 const linkClass =
   'font-semibold text-[#1B1B7A] underline decoration-[#F29A9A] decoration-2 underline-offset-4 hover:text-[#d96a6a] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A]';
 
-// TODO: ganti dengan data user dari API Anda
-const INITIAL_PROFILE: Profile = {
-  name: 'Siti Rahmawati',
-  email: 'siti@email.com',
-  phone: '081234567890',
-  birthDate: '1995-08-17',
-  gender: 'Perempuan',
-  address: 'Jl. Contoh No. 12, Bekasi, Jawa Barat',
+const EMPTY_PROFILE: Profile = {
+  name: '',
+  email: '',
+  phone: '',
+  birthDate: '',
+  gender: '',
+  address: '',
 };
+
+const GENDER_LABEL: Record<TGender, string> = {
+  female: 'Perempuan',
+  male: 'Laki-laki',
+  other: 'Lainnya',
+};
+
+// Ubah response backend ke bentuk form
+function toProfile(p: TPatient): Profile {
+  return {
+    name: p.full_name,
+    email: p.email,
+    phone: p.phone_number,
+    birthDate: p.patient_profiles?.date_of_birth?.slice(0, 10) ?? '',
+    gender: p.patient_profiles?.gender ?? '',
+    address: p.patient_profiles?.address ?? '',
+  };
+}
 
 function getInitials(name: string) {
   return (
@@ -161,15 +181,54 @@ function PasswordInput({
   );
 }
 
+function StatusScreen({
+  title,
+  children,
+}: {
+  title: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-neutral-100 px-5 text-neutral-900">
+      <div className="w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-6 text-center md:p-8">
+        <h1 className="text-2xl font-bold tracking-tight text-[#1B1B7A]">
+          {title}
+        </h1>
+        {children}
+      </div>
+    </main>
+  );
+}
+
 export default function ProfilePage() {
-  // ---- Data diri ----
-  const [profile, setProfile] = useState<Profile>(INITIAL_PROFILE);
-  const [draft, setDraft] = useState<Profile>(INITIAL_PROFILE);
+  // ---- Data diri (dari backend) ----
+  const { data, isPending, isError, error, refetch } = useGetMyPatient();
+  const profile = data ? toProfile(data.data) : null;
+
+  const [draft, setDraft] = useState<Profile>(EMPTY_PROFILE);
   const [isEditing, setIsEditing] = useState(false);
   const [profileErrors, setProfileErrors] = useState<ProfileErrors>({});
   const [profileStatus, setProfileStatus] = useState('');
   const [profileServerError, setProfileServerError] = useState('');
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  const { mutate: updateProfile, isPending: isSavingProfile } =
+    useUpdateMyPatient({
+      onSuccess: () => {
+        setIsEditing(false);
+        setProfileStatus('Data diri berhasil disimpan.');
+      },
+      onError: (err) => {
+        const status = getApiStatus(err);
+        setProfileServerError(
+          status === 409
+            ? 'Email atau nomor WhatsApp sudah dipakai akun lain.'
+            : getApiErrorMessage(
+                err,
+                'Data diri gagal disimpan. Silakan coba lagi.',
+              ),
+        );
+      },
+    });
 
   // ---- Password ----
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -192,6 +251,7 @@ export default function ProfilePage() {
   }
 
   function startEdit() {
+    if (!profile) return;
     setDraft(profile);
     setProfileErrors({});
     setProfileStatus('');
@@ -200,13 +260,12 @@ export default function ProfilePage() {
   }
 
   function cancelEdit() {
-    setDraft(profile);
     setProfileErrors({});
     setProfileServerError('');
     setIsEditing(false);
   }
 
-  async function handleSaveProfile(e: React.FormEvent) {
+  function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     setProfileServerError('');
     setProfileStatus('');
@@ -215,18 +274,15 @@ export default function ProfilePage() {
     setProfileErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    setIsSavingProfile(true);
-    try {
-      // TODO: panggil API update profil Anda di sini, contoh:
-      // await updateProfile(draft);
-      setProfile(draft);
-      setIsEditing(false);
-      setProfileStatus('Data diri berhasil disimpan.');
-    } catch {
-      setProfileServerError('Data diri gagal disimpan. Silakan coba lagi.');
-    } finally {
-      setIsSavingProfile(false);
-    }
+    // Kolom opsional yang dikosongkan dikirim sebagai null
+    updateProfile({
+      full_name: draft.name.trim(),
+      email: draft.email.trim(),
+      phone_number: draft.phone.replace(/[\s-]/g, ''),
+      date_of_birth: draft.birthDate || null,
+      gender: draft.gender || null,
+      address: draft.address.trim() || null,
+    });
   }
 
   async function handleChangePassword(e: React.FormEvent) {
@@ -288,6 +344,73 @@ export default function ProfilePage() {
   }
 
   const cardClass = 'rounded-3xl border border-neutral-200 bg-white p-6 md:p-8';
+
+  if (isPending) {
+    return (
+      <StatusScreen title="Memuat profil...">
+        <p
+          role="status"
+          className="mt-3 text-neutral-600"
+        >
+          Mohon tunggu sebentar.
+        </p>
+      </StatusScreen>
+    );
+  }
+
+  if (isError || !profile) {
+    const status = getApiStatus(error);
+
+    if (status === 401) {
+      return (
+        <StatusScreen title="Silakan masuk dulu">
+          <p className="mt-3 text-neutral-600">
+            Sesi Anda belum ada atau sudah berakhir.
+          </p>
+          <Link
+            href="/login"
+            className={`mt-6 inline-block ${primaryBtn}`}
+          >
+            Masuk
+          </Link>
+        </StatusScreen>
+      );
+    }
+
+    if (status === 403) {
+      return (
+        <StatusScreen title="Halaman khusus pasien">
+          <p className="mt-3 text-neutral-600">
+            Akun Anda bukan akun pasien, jadi profil pasien tidak tersedia.
+          </p>
+          <Link
+            href="/"
+            className={`mt-6 inline-block ${secondaryBtn}`}
+          >
+            Kembali ke beranda
+          </Link>
+        </StatusScreen>
+      );
+    }
+
+    return (
+      <StatusScreen title="Profil gagal dimuat">
+        <p
+          role="alert"
+          className="mt-3 text-neutral-600"
+        >
+          {getApiErrorMessage(error, 'Terjadi kesalahan. Silakan coba lagi.')}
+        </p>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className={`mt-6 ${primaryBtn}`}
+        >
+          Coba lagi
+        </button>
+      </StatusScreen>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-neutral-100 text-neutral-900">
@@ -413,7 +536,9 @@ export default function ProfilePage() {
                 <dt className="text-sm font-semibold text-neutral-600">
                   Jenis kelamin
                 </dt>
-                <dd className="mt-1">{profile.gender || '-'}</dd>
+                <dd className="mt-1">
+                  {profile.gender ? GENDER_LABEL[profile.gender] : '-'}
+                </dd>
               </div>
               <div className="sm:col-span-2">
                 <dt className="text-sm font-semibold text-neutral-600">
@@ -537,12 +662,20 @@ export default function ProfilePage() {
                     id="gender"
                     name="gender"
                     value={draft.gender}
-                    onChange={(e) => setField('gender', e.target.value)}
+                    onChange={(e) =>
+                      setField('gender', e.target.value as Profile['gender'])
+                    }
                     className={`${inputBase} border-neutral-300`}
                   >
                     <option value="">Pilih jenis kelamin</option>
-                    <option value="Perempuan">Perempuan</option>
-                    <option value="Laki-laki">Laki-laki</option>
+                    {Object.entries(GENDER_LABEL).map(([value, label]) => (
+                      <option
+                        key={value}
+                        value={value}
+                      >
+                        {label}
+                      </option>
+                    ))}
                   </select>
                 </Field>
 
