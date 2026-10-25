@@ -10,7 +10,8 @@ import {
   getInitials,
 } from '@/components/admin/doctor/utils';
 import { inputBase, linkClass, primaryBtn, secondaryBtn } from '@/components/user/booking/styles';
-import { formatTime } from '@/components/user/booking/utils';
+import RatingStars from '@/components/user/booking/rating-stars';
+import { formatDate, formatTime } from '@/components/user/booking/utils';
 import { treatments } from '@/components/user/landing-page/treatment';
 import { useGetDetailDoctor } from '@/hooks/useDoctors';
 import { DAYS, DAY_ORDER } from './constants';
@@ -68,6 +69,7 @@ export function DoctorProfile() {
     items: schedules.filter((s) => s.day_of_week === d),
   })).filter((d) => d.items.length > 0);
   const canBook = scheduleDays.length > 0 && !!treatmentSlug;
+  const reviews = doctor.reviews ?? [];
 
   return (
     <>
@@ -97,7 +99,7 @@ export function DoctorProfile() {
             {doctor.full_name}
           </h1>
 
-          <dl className="mt-5 grid gap-4 sm:grid-cols-2">
+          <dl className="mt-5 grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl bg-[#FAF8F3] px-4 py-3">
               <dt className="text-sm text-neutral-600">Pengalaman</dt>
               <dd className="text-lg font-bold text-neutral-900">
@@ -108,6 +110,22 @@ export function DoctorProfile() {
               <dt className="text-sm text-neutral-600">Biaya konsultasi</dt>
               <dd className="text-lg font-bold text-neutral-900">
                 {formatRupiah(doctor.consultation_fee)}
+              </dd>
+            </div>
+            <div className="rounded-2xl bg-[#FAF8F3] px-4 py-3">
+              <dt className="text-sm text-neutral-600">Rating</dt>
+              <dd className="text-lg font-bold text-neutral-900">
+                {doctor.rating_avg ? (
+                  <>
+                    {doctor.rating_avg.toLocaleString('id-ID')}
+                    <span className="text-sm font-normal text-neutral-600">
+                      {' '}
+                      / 5 · {doctor.rating_count} ulasan
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-base font-normal text-neutral-700">Belum ada ulasan</span>
+                )}
               </dd>
             </div>
           </dl>
@@ -195,6 +213,31 @@ export function DoctorProfile() {
           )}
         </section>
       </div>
+
+      {reviews.length > 0 && (
+        <section aria-labelledby="reviews-heading" className={`mt-6 ${card}`}>
+          <h2 id="reviews-heading" className="text-xl font-bold text-[#1B1B7A]">
+            Ulasan pasien
+          </h2>
+          <ul className="mt-4 divide-y divide-neutral-200">
+            {reviews.map((r) => (
+              <li key={r.id} className="py-4">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <RatingStars value={r.rating} />
+                  {/* Hanya nama depan untuk menjaga privasi pasien */}
+                  <span className="font-semibold text-neutral-900">
+                    {r.patient_profiles.users.full_name.split(' ')[0]}
+                  </span>
+                  <span className="text-sm text-neutral-600">{formatDate(r.created_at)}</span>
+                </div>
+                {r.review && (
+                  <p className="mt-2 whitespace-pre-line text-neutral-700">{r.review}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <p className="mt-6">
         <Link href="/doctor" className={linkClass}>
