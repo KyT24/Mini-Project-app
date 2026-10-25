@@ -5,35 +5,13 @@ import { Suspense, useEffect, useState } from 'react';
 import { formatRupiah, getApiErrorMessage } from '@/components/admin/doctor/utils';
 import RequirePatient from '@/components/user/booking/require-patient';
 import { card, primaryBtn, secondaryBtn } from '@/components/user/booking/styles';
+import RatingStars from '@/components/user/booking/rating-stars';
+import { STATUS_META } from '@/components/user/booking/status';
 import { formatCountdown, formatDate, formatTime } from '@/components/user/booking/utils';
 import { useGetMyAppointments } from '@/hooks/useAppointments';
 import type { TAppointment } from '@/types/appointment';
 
 const LIMIT = 10;
-
-type Status = { label: string; className: string };
-
-// Satu label yang mudah dipahami pasien dari status pembayaran + status janji temu
-function getStatus(appointment: TAppointment, remaining: number): Status {
-  const { payment_status, appointment_status } = appointment;
-
-  if (payment_status === 'unpaid' && remaining > 0)
-    return { label: 'Menunggu pembayaran', className: 'bg-amber-100 text-amber-950' };
-  if (payment_status === 'unpaid' || payment_status === 'expired')
-    return { label: 'Waktu bayar habis', className: 'bg-neutral-200 text-neutral-800' };
-  if (payment_status === 'rejected')
-    return { label: 'Pembayaran ditolak', className: 'bg-red-100 text-red-900' };
-  if (payment_status === 'pending_verification')
-    return { label: 'Menunggu verifikasi', className: 'bg-blue-100 text-blue-900' };
-
-  if (appointment_status === 'completed')
-    return { label: 'Selesai', className: 'bg-green-100 text-green-900' };
-  if (appointment_status === 'canceled')
-    return { label: 'Dibatalkan', className: 'bg-neutral-200 text-neutral-800' };
-  if (appointment_status === 'no_show')
-    return { label: 'Tidak hadir', className: 'bg-neutral-200 text-neutral-800' };
-  return { label: 'Terkonfirmasi', className: 'bg-green-100 text-green-900' };
-}
 
 // Sisa waktu bayar dihitung dari remaining_seconds server, berdetik selama masih ada
 function useNow(active: boolean) {
@@ -58,11 +36,11 @@ function AppointmentList() {
   const totalPages = Math.max(meta?.total_pages ?? 1, 1);
 
   const hasActiveHold = appointments.some(
-    (a) => a.payment_status === 'unpaid' && a.remaining_seconds > 0,
+    (a) => a.status === 'waiting_payment' && a.remaining_seconds > 0,
   );
   const now = useNow(hasActiveHold);
   const remainingOf = (a: TAppointment) =>
-    a.payment_status === 'unpaid'
+    a.status === 'waiting_payment'
       ? Math.max(Math.ceil((dataUpdatedAt + a.remaining_seconds * 1000 - now) / 1000), 0)
       : 0;
 
@@ -116,8 +94,10 @@ function AppointmentList() {
       >
         {appointments.map((a) => {
           const remaining = remainingOf(a);
-          const waiting = a.payment_status === 'unpaid' && remaining > 0;
-          const status = getStatus(a, remaining);
+          const waiting = a.status === 'waiting_payment' && remaining > 0;
+          // Hold yang baru habis di browser ditampilkan kedaluwarsa sebelum data dimuat ulang
+          const status =
+            STATUS_META[a.status === 'waiting_payment' && !waiting ? 'expired' : a.status];
           const session = a.practice_sessions;
 
           return (
@@ -142,7 +122,7 @@ function AppointmentList() {
                   </span>
                 </div>
 
-                <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3 sm:text-base">
+                <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 sm:text-base lg:grid-cols-4">
                   <div>
                     <dt className="text-neutral-600">Dokter</dt>
                     <dd className="font-semibold">{a.doctors.full_name}</dd>
@@ -155,8 +135,15 @@ function AppointmentList() {
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-neutral-600">Total</dt>
-                    <dd className="font-semibold">{formatRupiah(a.total_amount)}</dd>
+                    <dt className="text-neutral-600">No. antrean</dt>
+                    <dd className="font-semibold tabular-nums">{a.queue_number ?? '-'}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-neutral-600">Biaya konsultasi</dt>
+                    <dd className="font-semibold">{formatRupiah(a.consultation_fee)}</dd>
+                    <dd className="text-sm text-neutral-600">
+                      Total {formatRupiah(a.total_amount)}
+                    </dd>
                   </div>
                 </dl>
 
@@ -166,14 +153,18 @@ function AppointmentList() {
                       Sisa waktu unggah bukti:{' '}
                       <span className="tabular-nums">{formatCountdown(remaining)}</span>
                     </p>
+                  ) : a.ratings ? (
+                    <p className="flex items-center gap-2 text-sm text-neutral-700">
+                      Rating Anda <RatingStars value={a.ratings.rating} />
+                    </p>
                   ) : (
                     <span />
                   )}
                   <Link
-                    href={`/payment/${a.id}`}
-                    className={waiting ? primaryBtn : secondaryBtn}
+                    href={a.can_rate ? `/payment/${a.id}#rating` : `/payment/${a.id}`}
+                    className={waiting || a.can_rate ? primaryBtn : secondaryBtn}
                   >
-                    {waiting ? 'Lanjutkan pembayaran' : 'Lihat detail'}
+                    {waiting ? 'Lanjutkan pembayaran' : a.can_rate ? 'Beri rating' : 'Lihat detail'}
                     <span className="sr-only"> reservasi {a.appointment_code}</span>
                   </Link>
                 </div>
@@ -223,7 +214,7 @@ export default function HistoryPage() {
           Riwayat reservasi
         </h1>
         <p className="mt-2 text-neutral-600">
-          Lanjutkan pembayaran yang belum selesai atau lihat detail reservasi Anda.
+          Lihat status, nomor antrean, dan QR reservasi Anda.
         </p>
 
         <div className="mt-8">

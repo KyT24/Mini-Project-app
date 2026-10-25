@@ -278,7 +278,7 @@ export default function BookingForm({ treatment }: Props) {
       </div>
 
       <div className="mt-8 rounded-2xl bg-[#FAF8F3] px-4 py-3 text-sm text-neutral-700">
-        Setelah reservasi dibuat, kuota Anda ditahan selama <strong>10 menit</strong>. Unggah bukti
+        Setelah reservasi dibuat, kuota Anda ditahan selama <strong>30 menit</strong>. Unggah bukti
         pembayaran sebelum waktu habis, atau kuota akan dilepas dan Anda perlu memesan ulang.
       </div>
 
