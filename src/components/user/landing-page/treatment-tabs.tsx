@@ -1,8 +1,9 @@
 'use client';
 
 import { treatments } from '@/components/user/landing-page/treatment';
+import Link from 'next/link';
 import { useRef, useState } from 'react';
-import { NAVY, RESERVE_HREF } from './constants';
+import { NAVY } from './constants';
 
 const categories = [
   'Acne & Scar',
@@ -115,51 +116,26 @@ export function TreatmentTabs() {
                 {t.description}
               </p>
 
-              <a
-                href={
-                  t.action === 'reserve'
-                    ? (t.href ?? RESERVE_HREF)
-                    : (t.href ?? '#')
-                }
-                {...(t.action === 'reserve'
-                  ? { target: '_blank', rel: 'noopener noreferrer' }
-                  : {})}
+              <Link
+                href={`/treatment/${t.slug}`}
                 className="mt-5 flex items-center justify-center gap-2 rounded-xl border-2 border-[#1B1B7A] px-4 py-3 font-bold text-[#1B1B7A] transition-colors hover:bg-[#1B1B7A] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A] md:mt-6 md:rounded-2xl md:py-3.5"
               >
-                {t.action === 'reserve'
-                  ? 'Reservasi Sekarang'
-                  : 'Lihat Selengkapnya'}
-                {t.action === 'reserve' ? (
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
-                  </svg>
-                ) : (
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                )}
+                Lihat Selengkapnya
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
                 <span className="sr-only">: {t.title}</span>
-              </a>
+              </Link>
             </div>
           </article>
         ))}
