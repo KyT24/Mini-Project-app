@@ -26,6 +26,10 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const justRegistered = searchParams.get('registered') === '1';
+  // Hanya path internal agar tidak bisa dipakai untuk open redirect
+  const redirectParam = searchParams.get('redirect');
+  const redirectTo =
+    redirectParam?.startsWith('/') && !redirectParam.startsWith('//') ? redirectParam : '/';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -36,7 +40,7 @@ function LoginForm() {
   const { mutate: login, isPending: isSubmitting } = useLogin({
     onSuccess: ({ data }) => {
       const role = data.user.role;
-      router.push(role === 'ADMIN' || role === 'STAFF' ? '/admin/dashboard' : '/');
+      router.push(role === 'ADMIN' || role === 'STAFF' ? '/admin/dashboard' : redirectTo);
     },
     onError: (error) =>
       setServerError(

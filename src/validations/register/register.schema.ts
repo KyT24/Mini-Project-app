@@ -3,37 +3,11 @@ import {
   type FieldErrors,
   emailField,
   firstError,
+  nameField,
+  passwordField,
+  phoneField,
   toFieldErrors,
 } from '../shared/fields';
-
-// Nomor Indonesia: 08xx / +628xx / 628xx, 9-12 digit setelah angka 8
-const PHONE_REGEX = /^(\+62|62|0)8\d{8,11}$/;
-const NAME_REGEX = /^[\p{L}\p{M}][\p{L}\p{M}\s.'-]*$/u;
-
-const nameField = z
-  .string()
-  .trim()
-  .min(1, 'Nama lengkap wajib diisi')
-  .min(3, 'Nama minimal 3 karakter')
-  .max(100, 'Nama maksimal 100 karakter')
-  .regex(NAME_REGEX, 'Nama hanya boleh berisi huruf');
-
-const phoneField = z
-  .string()
-  .trim()
-  .min(1, 'Nomor WhatsApp wajib diisi')
-  .refine((v) => PHONE_REGEX.test(v.replace(/[\s-]/g, '')), {
-    message: 'Nomor tidak valid. Contoh: 081234567890',
-  });
-
-const passwordField = z
-  .string()
-  .min(1, 'Password wajib diisi')
-  .min(8, 'Password minimal 8 karakter')
-  .max(72, 'Password maksimal 72 karakter')
-  .refine((v) => /[A-Za-z]/.test(v) && /\d/.test(v), {
-    message: 'Password harus mengandung huruf dan angka',
-  });
 
 const confirmPasswordField = z.string().min(1, 'Konfirmasi password wajib diisi');
 
