@@ -1,4 +1,5 @@
 // Bentuk data mengikuti response backend (Mini-Project.api/src/features/doctor)
+import type { TRating } from './appointment';
 import type { TDoctorSchedule } from './schedule';
 
 export type TDoctorUser = {
@@ -28,6 +29,10 @@ export type TDoctor = {
     TDoctorSchedule,
     'id' | 'day_of_week' | 'start_time' | 'end_time' | 'patient_quota'
   >[];
+  // Hanya ada di GET /doctors/:id
+  rating_avg?: number | null;
+  rating_count?: number;
+  reviews?: (TRating & { patient_profiles: { users: { full_name: string } } })[];
 };
 
 export type TDoctorSort =

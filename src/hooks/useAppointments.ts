@@ -10,6 +10,7 @@ import type {
   TAppointment,
   TAppointmentCreate,
   TAvailability,
+  TRatingCreate,
 } from '@/types/appointment';
 import type { TApiSuccessResponse, TPaginateResponse } from '@/types/doctor';
 
@@ -65,7 +66,7 @@ export const useGetAppointment = (id?: string) => {
   });
 };
 
-// POST /appointments — menahan 1 kuota selama 10 menit
+// POST /appointments — menahan 1 kuota selama 30 menit
 export const useCreateAppointment = ({
   onError,
   onSuccess,
@@ -108,6 +109,56 @@ export const useUploadPaymentProof = ({
     onSuccess: (response) => {
       queryClient.setQueryData(['get-appointment', response.data.id], response);
       queryClient.invalidateQueries({ queryKey: ['get-my-appointments'] });
+      onSuccess?.(response);
+    },
+    onError: (error) => onError?.(error as AxiosError),
+  });
+};
+
+// PATCH /appointments/:id/cancel — kuota dilepas, antrean di belakangnya maju
+export const useCancelAppointment = ({
+  onError,
+  onSuccess,
+}: TMutationCallbacks<TApiSuccessResponse<TAppointment>> = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['cancel-appointment'],
+    mutationFn: async (id: string) => {
+      const { data } = await axiosInstance.patch<
+        TApiSuccessResponse<TAppointment>
+      >(`/appointments/${id}/cancel`);
+      return data;
+    },
+    onSuccess: (response) => {
+      queryClient.setQueryData(['get-appointment', response.data.id], response);
+      queryClient.invalidateQueries({ queryKey: ['get-my-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['get-availability'] });
+      onSuccess?.(response);
+    },
+    onError: (error) => onError?.(error as AxiosError),
+  });
+};
+
+// POST /appointments/:id/rating — hanya setelah janji temu selesai
+export const useRateAppointment = ({
+  onError,
+  onSuccess,
+}: TMutationCallbacks<TApiSuccessResponse<TAppointment>> = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['rate-appointment'],
+    mutationFn: async ({ id, body }: { id: string; body: TRatingCreate }) => {
+      const { data } = await axiosInstance.post<
+        TApiSuccessResponse<TAppointment>
+      >(`/appointments/${id}/rating`, body);
+      return data;
+    },
+    onSuccess: (response) => {
+      queryClient.setQueryData(['get-appointment', response.data.id], response);
+      queryClient.invalidateQueries({ queryKey: ['get-my-appointments'] });
+      queryClient.invalidateQueries({
+        queryKey: ['get-detail-doctor', response.data.doctors.id],
+      });
       onSuccess?.(response);
     },
     onError: (error) => onError?.(error as AxiosError),
