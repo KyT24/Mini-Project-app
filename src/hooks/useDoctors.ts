@@ -22,12 +22,33 @@ type TMutationCallbacks<T = unknown> = {
 
 // GET /doctors
 export const useGetDoctors = (
-  { page, limit, search, is_active, sort }: TDoctorIndex = {},
+  {
+    page,
+    limit,
+    search,
+    is_active,
+    sort,
+    specialist_id,
+    min_fee,
+    max_fee,
+    day_of_week,
+  }: TDoctorIndex = {},
   enabled = true,
 ) => {
   return useQuery<TPaginateResponse<TDoctor>>({
     enabled,
-    queryKey: ['get-doctors', page, limit, search, is_active, sort],
+    queryKey: [
+      'get-doctors',
+      page,
+      limit,
+      search,
+      is_active,
+      sort,
+      specialist_id,
+      min_fee,
+      max_fee,
+      day_of_week,
+    ],
     placeholderData: keepPreviousData,
     queryFn: async () => {
       const { data } = await axiosInstance.get('/doctors', {
@@ -37,6 +58,10 @@ export const useGetDoctors = (
           search: search || undefined,
           is_active,
           sort,
+          specialist_id: specialist_id || undefined,
+          min_fee,
+          max_fee,
+          day_of_week,
         },
       });
       return data;
@@ -99,6 +124,26 @@ export const useUpdateDoctor = ({
       queryClient.invalidateQueries({ queryKey: ['get-detail-doctor', id] });
       onSuccess?.(response);
     },
+    onError: (error) => onError?.(error as AxiosError),
+  });
+};
+
+// POST /doctors/photo (multipart, field "photo") — mengembalikan URL foto
+export const useUploadDoctorPhoto = ({
+  onError,
+  onSuccess,
+}: TMutationCallbacks<TApiSuccessResponse<{ url: string }>> = {}) => {
+  return useMutation({
+    mutationKey: ['upload-doctor-photo'],
+    mutationFn: async (file: File) => {
+      const form = new FormData();
+      form.append('photo', file);
+      const { data } = await axiosInstance.post<
+        TApiSuccessResponse<{ url: string }>
+      >('/doctors/photo', form);
+      return data;
+    },
+    onSuccess: (response) => onSuccess?.(response),
     onError: (error) => onError?.(error as AxiosError),
   });
 };

@@ -1,4 +1,5 @@
 // Bentuk data mengikuti response backend (Mini-Project.api/src/features/doctor)
+import type { TDoctorSchedule } from './schedule';
 
 export type TDoctorUser = {
   id: string;
@@ -16,10 +17,17 @@ export type TDoctor = {
   experience_years: number;
   consultation_fee: string; // Decimal dari Prisma dikirim sebagai string
   photo: string | null;
+  specialist_id: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
   users: TDoctorUser;
+  specialists: { id: string; name: string } | null;
+  // Hanya jadwal aktif, urut hari lalu jam
+  doctor_schedules: Pick<
+    TDoctorSchedule,
+    'id' | 'day_of_week' | 'start_time' | 'end_time' | 'patient_quota'
+  >[];
 };
 
 export type TDoctorSort =
@@ -34,20 +42,30 @@ export type TDoctorIndex = {
   search?: string;
   is_active?: boolean;
   sort?: TDoctorSort;
+  specialist_id?: string;
+  min_fee?: number;
+  max_fee?: number;
+  day_of_week?: number;
 };
 
+// Akun login (role DOCTOR) dibuat backend bersamaan dengan profil dokter
 export type TDoctorCreate = {
-  user_id: string;
+  email: string;
+  phone_number: string;
+  password: string;
   full_name: string;
   bio?: string | null;
   experience_years?: number;
   consultation_fee?: number | string;
   photo?: string | null;
+  specialist_id?: string | null;
   is_active?: boolean;
 };
 
-// user_id tidak bisa diubah
-export type TDoctorUpdate = Partial<Omit<TDoctorCreate, 'user_id'>>;
+// Data akun tidak diubah lewat form dokter
+export type TDoctorUpdate = Partial<
+  Omit<TDoctorCreate, 'email' | 'phone_number' | 'password'>
+>;
 
 export type TApiSuccessResponse<T> = {
   success: true;

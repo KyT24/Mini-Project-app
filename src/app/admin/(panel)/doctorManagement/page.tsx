@@ -3,8 +3,11 @@
 import { useEffect, useState } from 'react';
 import DeleteDoctorModal from '@/components/admin/doctor/delete-doctor-modal';
 import DoctorFormModal from '@/components/admin/doctor/doctor-form-modal';
+import ScheduleModal from '@/components/admin/doctor/schedule-modal';
 import { formatRupiah, getApiErrorMessage, getInitials } from '@/components/admin/doctor/utils';
 import { inputBase, primaryBtn, secondaryBtn } from '@/components/admin/styles';
+import { formatPracticeDays } from '@/components/user/doctor/constants';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useGetDoctors } from '@/hooks/useDoctors';
 import type { TDoctor, TDoctorSort } from '@/types/doctor';
 
@@ -16,6 +19,7 @@ type ModalState =
   | { type: 'create' }
   | { type: 'edit'; doctor: TDoctor }
   | { type: 'delete'; doctor: TDoctor }
+  | { type: 'schedule'; doctor: TDoctor }
   | null;
 
 const SORT_OPTIONS: { value: TDoctorSort; label: string }[] = [
@@ -30,7 +34,6 @@ const actionLink =
 
 export default function DoctorManagementPage() {
   const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<TDoctorSort>('newest');
   const [page, setPage] = useState(1);
@@ -38,13 +41,7 @@ export default function DoctorManagementPage() {
   const [notice, setNotice] = useState('');
 
   // Tunda pencarian agar tidak memanggil API di setiap ketikan
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setDebouncedSearch(search.trim());
-      setPage(1);
-    }, 400);
-    return () => clearTimeout(t);
-  }, [search]);
+  const debouncedSearch = useDebounce(search.trim());
 
   useEffect(() => {
     if (!notice) return;
@@ -104,7 +101,10 @@ export default function DoctorManagementPage() {
             type="search"
             placeholder="Nama dokter"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className={`mt-2 ${inputBase} border-neutral-300`}
           />
         </div>
@@ -173,14 +173,16 @@ export default function DoctorManagementPage() {
           <div className="overflow-x-auto">
             <table
               aria-busy={isFetching}
-              className={`w-full min-w-180 text-left ${isFetching ? 'opacity-60' : ''}`}
+              className={`w-full min-w-220 text-left ${isFetching ? 'opacity-60' : ''}`}
             >
               <caption className="sr-only">Daftar dokter</caption>
               <thead className="border-b border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
                 <tr>
                   <th scope="col" className="px-5 py-3 font-semibold">Dokter</th>
+                  <th scope="col" className="px-5 py-3 font-semibold">Spesialis</th>
                   <th scope="col" className="px-5 py-3 font-semibold">Pengalaman</th>
                   <th scope="col" className="px-5 py-3 font-semibold">Biaya konsultasi</th>
+                  <th scope="col" className="px-5 py-3 font-semibold">Jadwal</th>
                   <th scope="col" className="px-5 py-3 font-semibold">Status</th>
                   <th scope="col" className="px-5 py-3 text-right font-semibold">Aksi</th>
                 </tr>
@@ -210,8 +212,14 @@ export default function DoctorManagementPage() {
                         </div>
                       </div>
                     </th>
+                    <td className="px-5 py-4">{doctor.specialists?.name ?? '-'}</td>
                     <td className="px-5 py-4">{doctor.experience_years} tahun</td>
                     <td className="px-5 py-4">{formatRupiah(doctor.consultation_fee)}</td>
+                    <td className="px-5 py-4">
+                      {formatPracticeDays(doctor.doctor_schedules ?? []) || (
+                        <span className="text-neutral-600">Belum ada</span>
+                      )}
+                    </td>
                     <td className="px-5 py-4">
                       <span
                         className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
@@ -225,6 +233,13 @@ export default function DoctorManagementPage() {
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setModal({ type: 'schedule', doctor })}
+                          className={`${actionLink} text-[#1B1B7A] hover:bg-neutral-100`}
+                        >
+                          Jadwal<span className="sr-only"> {doctor.full_name}</span>
+                        </button>
                         <button
                           type="button"
                           onClick={() => setModal({ type: 'edit', doctor })}
@@ -284,6 +299,13 @@ export default function DoctorManagementPage() {
       )}
       {modal?.type === 'edit' && (
         <DoctorFormModal
+          doctor={modal.doctor}
+          onClose={() => setModal(null)}
+          onSuccess={handleSuccess}
+        />
+      )}
+      {modal?.type === 'schedule' && (
+        <ScheduleModal
           doctor={modal.doctor}
           onClose={() => setModal(null)}
           onSuccess={handleSuccess}
