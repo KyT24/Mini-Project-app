@@ -4,6 +4,7 @@ import {
   getTreatmentBySlug,
   treatments,
 } from '@/components/user/landing-page/treatment';
+import { categoryIcons } from '@/components/user/treatment/treatment-card';
 
 const primaryBtn =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#1B1B7A] px-6 py-3 font-bold text-white transition-colors hover:bg-[#12125c] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A]';
@@ -32,6 +33,8 @@ export default async function TreatmentDetailPage({
 
   if (!treatment) notFound();
 
+  const Icon = categoryIcons[treatment.category];
+
   // Treatment lain di kategori yang sama
   const related = treatments.filter(
     (t) => t.category === treatment.category && t.slug !== treatment.slug,
@@ -41,21 +44,25 @@ export default async function TreatmentDetailPage({
     <main className="min-h-screen bg-neutral-100 text-neutral-900">
       <div className="mx-auto max-w-4xl px-5 py-8 md:px-8 md:py-12">
         <Link
-          href="/"
+          href="/treatment"
           className={linkClass}
         >
-          Kembali ke beranda
+          Kembali ke daftar treatment
         </Link>
 
         <article className="mt-6 overflow-hidden rounded-3xl border border-neutral-200 bg-white">
-          <div className="relative aspect-video w-full bg-linear-to-br from-[#1B1B7A]/15 to-[#1B1B7A]/5">
-            {treatment.image && (
-              <img
-                src={treatment.image}
-                alt={treatment.title}
-                className="h-full w-full object-cover"
-              />
-            )}
+          <div className="relative flex h-40 items-center overflow-hidden bg-[#1B1B7A] px-6 md:h-56 md:px-10">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[#F29A9A]/30 blur-3xl"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-white/10 blur-3xl"
+            />
+            <span className="relative grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-white ring-1 ring-white/20 md:h-24 md:w-24">
+              <Icon size={44} strokeWidth={1.5} aria-hidden="true" />
+            </span>
           </div>
 
           <div className="p-6 md:p-10">
