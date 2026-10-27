@@ -1,6 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { Suspense } from 'react';
+
+// Tahun dibaca saat runtime; dibungkus Suspense agar footer tetap bisa di-prerender
+function CurrentYear() {
+  return <>{new Date().getFullYear()}</>;
+}
 
 export default function Footer() {
   return (
@@ -164,7 +170,13 @@ export default function Footer() {
       {/* BAR BAWAH */}
       <div className="border-t border-white/15">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-5 py-5 text-sm text-white/80 sm:flex-row md:px-8">
-          <p>© {new Date().getFullYear()} IH Beauty Clinic</p>
+          <p>
+            ©{' '}
+            <Suspense>
+              <CurrentYear />
+            </Suspense>{' '}
+            IH Beauty Clinic
+          </p>
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

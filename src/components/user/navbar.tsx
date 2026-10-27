@@ -1,13 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { useLogout, useMe } from '@/hooks/useAuth';
 
 const links = [
   { href: '/', label: 'Beranda' },
   { href: '/treatment', label: 'Treatment' },
   { href: '/doctor', label: 'Our Doctor' },
+];
+
+const accountLinks = [
+  { href: '/profile', label: 'Edit profil' },
+  { href: '/history', label: 'Riwayat reservasi' },
 ];
 
 export type NavbarUser = { name: string; avatarUrl?: string | null } | null;
@@ -42,13 +48,123 @@ function Avatar({
   );
 }
 
-// user = null  → belum login (tampil tombol "Masuk" ke /login)
-// user = {...} → sudah login (tampil foto profil ke /profile)
-export default function Navbar({ user = null }: { user?: NavbarUser }) {
+// Dropdown akun di balik foto profil: edit profil, riwayat, dan keluar.
+function AccountMenu({
+  user,
+  onLogout,
+  isLoggingOut,
+}: {
+  user: NonNullable<NavbarUser> & { email: string };
+  onLogout: () => void;
+  isLoggingOut: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Tutup saat klik di luar menu atau tekan Escape
+  useEffect(() => {
+    if (!open) return;
+
+    const onClick = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const itemClass =
+    'flex w-full items-center rounded-lg px-3 py-2.5 text-left font-medium text-neutral-800 hover:bg-[#FAF8F3] hover:text-[#1B1B7A] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#1B1B7A]';
+
+  return (
+    <div
+      ref={rootRef}
+      className="relative lg:order-last"
+    >
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls="account-menu"
+        aria-label={`Menu akun ${user.name}`}
+        className="grid h-11 w-11 place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A]"
+      >
+        <Avatar
+          user={user}
+          size="h-9 w-9"
+        />
+      </button>
+
+      {open && (
+        <div
+          id="account-menu"
+          className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-neutral-200 bg-white p-2 shadow-lg"
+        >
+          <div className="border-b border-neutral-200 px-3 pb-3 pt-1">
+            <p className="truncate font-semibold text-[#1B1B7A]">{user.name}</p>
+            <p className="truncate text-sm text-neutral-600">{user.email}</p>
+          </div>
+          <ul className="py-1">
+            {accountLinks.map((l) => (
+              <li key={l.href}>
+                <Link
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className={itemClass}
+                >
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="border-t border-neutral-200 pt-1">
+            <button
+              type="button"
+              onClick={onLogout}
+              disabled={isLoggingOut}
+              className={`${itemClass} text-red-700 hover:text-red-800 disabled:opacity-60`}
+            >
+              {isLoggingOut ? 'Keluar...' : 'Keluar'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Belum login → tombol "Masuk" ke /login
+// Sudah login → foto profil dengan menu akun
+export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const { data: me, isPending: isLoadingMe } = useMe();
+  const user = me
+    ? { name: me.full_name, email: me.email, avatarUrl: me.profile_picture }
+    : null;
+
+  const { mutate: logout, isPending: isLoggingOut } = useLogout({
+    onSuccess: () => {
+      setOpen(false);
+      router.push('/');
+    },
+  });
 
   // Link aktif: "/" harus sama persis, sisanya juga cocok untuk sub-halaman
   // (mis. /treatment/acne-facial tetap menandai "Treatment").
@@ -149,21 +265,18 @@ export default function Navbar({ user = null }: { user?: NavbarUser }) {
           </ul>
 
           <div className="flex items-center gap-2">
-            {/* AKUN: foto profil → /profile, atau tombol Masuk → /login */}
-            {user ? (
-              <Link
-                href="/profile"
-                aria-label={`Profil ${user.name}`}
-                aria-current={
-                  pathname.startsWith('/profile') ? 'page' : undefined
-                }
-                className="grid h-11 w-11 place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] lg:order-last"
-              >
-                <Avatar
-                  user={user}
-                  size="h-9 w-9"
-                />
-              </Link>
+            {/* AKUN: foto profil + menu, atau tombol Masuk → /login */}
+            {isLoadingMe ? (
+              <span
+                aria-hidden="true"
+                className="h-9 w-9 animate-pulse rounded-full bg-neutral-200 lg:order-last"
+              />
+            ) : user ? (
+              <AccountMenu
+                user={user}
+                onLogout={() => logout()}
+                isLoggingOut={isLoggingOut}
+              />
             ) : (
               <Link
                 href="/login"
@@ -223,7 +336,7 @@ export default function Navbar({ user = null }: { user?: NavbarUser }) {
                   {user.name}
                 </span>
                 <span className="block text-sm text-neutral-600">
-                  Lihat profil
+                  Edit profil
                 </span>
               </span>
             </Link>
@@ -263,8 +376,29 @@ export default function Navbar({ user = null }: { user?: NavbarUser }) {
             ))}
           </ul>
 
-          <div className="mx-auto w-full max-w-6xl px-5 pb-6 pt-2 md:px-8">
-          </div>
+          {user && (
+            <ul className="mx-auto w-full max-w-6xl border-t border-neutral-200 px-5 py-2 md:px-8">
+              <li className="border-b border-neutral-200">
+                <Link
+                  href="/history"
+                  onClick={close}
+                  className="flex items-center py-4 text-lg font-medium text-[#1B1B7A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A]"
+                >
+                  Riwayat treatment
+                </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => logout()}
+                  disabled={isLoggingOut}
+                  className="flex w-full items-center py-4 text-left text-lg font-medium text-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] disabled:opacity-60"
+                >
+                  {isLoggingOut ? 'Keluar...' : 'Keluar'}
+                </button>
+              </li>
+            </ul>
+          )}
         </div>
       </header>
 
