@@ -3,20 +3,16 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
-import {
-  formatRupiah,
-  getApiErrorMessage,
-  getApiStatus,
-  getInitials,
-} from '@/components/admin/doctor/utils';
-import { inputBase, linkClass, primaryBtn, secondaryBtn } from '@/components/user/booking/styles';
+import { formatRupiah, getInitials } from '@/lib/format';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
+import { inputBase, linkClass, primaryBtn, secondaryBtn } from '@/lib/styles';
 import RatingStars from '@/components/user/booking/rating-stars';
-import { formatDate, formatTime } from '@/components/user/booking/utils';
-import { treatments } from '@/components/user/landing-page/treatment';
-import { useGetDetailDoctor } from '@/hooks/useDoctors';
-import { DAYS, DAY_ORDER } from './constants';
+import { formatDate, formatTime } from '@/lib/format';
+import { treatments } from '@/constants/treatments';
+import { useGetDetailDoctor } from '@/hooks/api/use-doctors';
+import { DAYS, DAY_ORDER } from '@/lib/schedule';
 
-const card = 'rounded-3xl border border-neutral-200 bg-white p-5 md:p-8';
+const profileCard = 'rounded-3xl border border-neutral-200 bg-white p-5 md:p-8';
 
 export function DoctorProfile() {
   const { doctorDetail } = useParams<{ doctorDetail: string }>();
@@ -39,7 +35,7 @@ export function DoctorProfile() {
   const status = getApiStatus(error);
   if ((isError && (status === 404 || status === 422)) || (doctor && !doctor.is_active)) {
     return (
-      <div className={`mt-6 ${card}`}>
+      <div className={`mt-6 ${profileCard}`}>
         <h1 className="text-2xl font-bold text-[#1B1B7A]">Dokter tidak ditemukan</h1>
         <p className="mt-2 text-neutral-700">
           Dokter ini tidak ditemukan atau sedang tidak menerima pasien.
@@ -53,7 +49,7 @@ export function DoctorProfile() {
 
   if (isError || !doctor) {
     return (
-      <div role="alert" className={`mt-6 ${card}`}>
+      <div role="alert" className={`mt-6 ${profileCard}`}>
         <p className="text-red-900">{getApiErrorMessage(error, 'Profil dokter gagal dimuat.')}</p>
         <button type="button" onClick={() => refetch()} className={`mt-4 ${secondaryBtn}`}>
           Coba lagi
@@ -73,7 +69,7 @@ export function DoctorProfile() {
 
   return (
     <>
-      <article className={`mt-6 grid gap-6 md:grid-cols-[280px_1fr] md:gap-8 ${card}`}>
+      <article className={`mt-6 grid gap-6 md:grid-cols-[280px_1fr] md:gap-8 ${profileCard}`}>
         <div className="aspect-4/5 w-full max-w-xs overflow-hidden rounded-2xl bg-linear-to-br from-[#1B1B7A]/15 to-[#1B1B7A]/5 md:max-w-none">
           {image ? (
             <img
@@ -142,7 +138,7 @@ export function DoctorProfile() {
       </article>
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <section aria-labelledby="schedule-heading" className={card}>
+        <section aria-labelledby="schedule-heading" className={profileCard}>
           <h2 id="schedule-heading" className="text-xl font-bold text-[#1B1B7A]">
             Jadwal Praktik
           </h2>
@@ -170,7 +166,7 @@ export function DoctorProfile() {
           )}
         </section>
 
-        <section aria-labelledby="booking-heading" className={card}>
+        <section aria-labelledby="booking-heading" className={profileCard}>
           <h2 id="booking-heading" className="text-xl font-bold text-[#1B1B7A]">
             Buat Reservasi
           </h2>
@@ -215,7 +211,7 @@ export function DoctorProfile() {
       </div>
 
       {reviews.length > 0 && (
-        <section aria-labelledby="reviews-heading" className={`mt-6 ${card}`}>
+        <section aria-labelledby="reviews-heading" className={`mt-6 ${profileCard}`}>
           <h2 id="reviews-heading" className="text-xl font-bold text-[#1B1B7A]">
             Ulasan pasien
           </h2>

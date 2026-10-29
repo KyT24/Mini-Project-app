@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { linkClass } from '@/components/user/booking/styles';
+import { linkClass } from '@/lib/styles';
 import { DoctorProfile } from '@/components/user/doctor/doctor-profile';
 
 export const metadata = { title: 'Profil Dokter' };

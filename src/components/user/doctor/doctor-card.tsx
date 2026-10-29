@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { formatRupiah, getInitials } from '@/components/admin/doctor/utils';
+import { formatRupiah, getInitials } from '@/lib/format';
 import type { TDoctor } from '@/types/doctor';
-import { formatPracticeDays } from './constants';
+import { formatPracticeDays } from '@/lib/schedule';
 
 // Kartu dokter dipakai di landing page & halaman /doctor
 export function DoctorCard({ doctor }: { doctor: TDoctor }) {
