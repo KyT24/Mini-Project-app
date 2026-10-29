@@ -1,11 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  featuredTreatments,
-  type Category,
-  type Treatment,
-} from './treatment';
+import { featuredTreatments, type Category, type Treatment } from '@/constants/treatments';
 import { useCarousel } from './use-carousel';
 
 // Path ikon garis (viewBox 24x24) per kategori

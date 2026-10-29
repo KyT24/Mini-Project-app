@@ -1,7 +1,7 @@
 'use client';
 
 import { DoctorCard } from '@/components/user/doctor/doctor-card';
-import { useGetDoctors } from '@/hooks/useDoctors';
+import { useGetDoctors } from '@/hooks/api/use-doctors';
 
 // Jumlah dokter yang ditampilkan di landing page
 const LIMIT = 4;

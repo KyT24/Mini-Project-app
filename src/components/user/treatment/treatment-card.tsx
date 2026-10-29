@@ -8,7 +8,7 @@ import {
   Wind,
   type LucideIcon,
 } from 'lucide-react';
-import type { Category, Treatment } from '@/components/user/landing-page/treatment';
+import type { Category, Treatment } from '@/constants/treatments';
 
 export const categoryIcons: Record<Category, LucideIcon> = {
   'Acne & Scar': ScanFace,

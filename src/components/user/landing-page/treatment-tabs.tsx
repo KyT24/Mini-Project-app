@@ -2,11 +2,7 @@
 
 import Link from 'next/link';
 import { useRef, useState } from 'react';
-import {
-  categories,
-  treatments,
-  type Category,
-} from '@/components/user/landing-page/treatment';
+import { categories, treatments, type Category } from '@/constants/treatments';
 import {
   categoryIcons,
   TreatmentCard,
