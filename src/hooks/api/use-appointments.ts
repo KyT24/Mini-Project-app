@@ -4,20 +4,19 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import { axiosInstance } from '@/config/axiosInstance';
+import type {
+  TApiError,
+  TApiSuccessResponse,
+  TMutationCallbacks,
+  TPaginateResponse,
+} from '@/types/api';
 import type {
   TAppointment,
   TAppointmentCreate,
   TAvailability,
   TRatingCreate,
 } from '@/types/appointment';
-import type { TApiSuccessResponse, TPaginateResponse } from '@/types/doctor';
-
-type TMutationCallbacks<T = unknown> = {
-  onSuccess?: (data: T) => void;
-  onError?: (error: AxiosError) => void;
-};
 
 // GET /appointments/availability — kuota tiap jadwal dokter di satu tanggal
 export const useGetAvailability = (doctorId?: string, date?: string) => {
@@ -86,7 +85,7 @@ export const useCreateAppointment = ({
       queryClient.setQueryData(['get-appointment', response.data.id], response);
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -111,7 +110,7 @@ export const useUploadPaymentProof = ({
       queryClient.invalidateQueries({ queryKey: ['get-my-appointments'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -135,7 +134,7 @@ export const useCancelAppointment = ({
       queryClient.invalidateQueries({ queryKey: ['get-availability'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -161,6 +160,6 @@ export const useRateAppointment = ({
       });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };

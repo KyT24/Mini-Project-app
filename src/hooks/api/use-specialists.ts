@@ -4,21 +4,19 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import { axiosInstance } from '@/config/axiosInstance';
 import type {
+  TApiError,
   TApiSuccessResponse,
+  TMutationCallbacks,
   TPaginateResponse,
+} from '@/types/api';
+import type {
   TSpecialist,
   TSpecialistCreate,
   TSpecialistIndex,
   TSpecialistUpdate,
 } from '@/types/specialist';
-
-type TMutationCallbacks<T = unknown> = {
-  onSuccess?: (data: T) => void;
-  onError?: (error: AxiosError) => void;
-};
 
 // GET /specialists
 export const useGetSpecialists = (
@@ -56,7 +54,7 @@ export const useCreateSpecialist = ({
       queryClient.invalidateQueries({ queryKey: ['get-specialists'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -86,7 +84,7 @@ export const useUpdateSpecialist = ({
       queryClient.invalidateQueries({ queryKey: ['get-doctors'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -108,6 +106,6 @@ export const useDeleteSpecialist = ({
       queryClient.invalidateQueries({ queryKey: ['get-specialists'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };

@@ -1,8 +1,4 @@
 // Bentuk data mengikuti response backend (Mini-Project.api/src/features/specialist)
-import type { TApiSuccessResponse, TPaginateResponse } from '@/types/doctor';
-
-export type { TApiSuccessResponse, TPaginateResponse };
-
 export type TSpecialist = {
   id: string;
   name: string;

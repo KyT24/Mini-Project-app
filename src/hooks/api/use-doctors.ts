@@ -4,21 +4,19 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import { axiosInstance } from '@/config/axiosInstance';
 import type {
+  TApiError,
   TApiSuccessResponse,
+  TMutationCallbacks,
+  TPaginateResponse,
+} from '@/types/api';
+import type {
   TDoctor,
   TDoctorCreate,
   TDoctorIndex,
   TDoctorUpdate,
-  TPaginateResponse,
 } from '@/types/doctor';
-
-type TMutationCallbacks<T = unknown> = {
-  onSuccess?: (data: T) => void;
-  onError?: (error: AxiosError) => void;
-};
 
 // GET /doctors
 export const useGetDoctors = (
@@ -100,7 +98,7 @@ export const useCreateDoctor = ({
       queryClient.invalidateQueries({ queryKey: ['get-doctors'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -124,7 +122,7 @@ export const useUpdateDoctor = ({
       queryClient.invalidateQueries({ queryKey: ['get-detail-doctor', id] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -144,7 +142,7 @@ export const useUploadDoctorPhoto = ({
       return data;
     },
     onSuccess: (response) => onSuccess?.(response),
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -166,6 +164,6 @@ export const useDeleteDoctor = ({
       queryClient.invalidateQueries({ queryKey: ['get-doctors'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };

@@ -1,13 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import { axiosInstance } from '@/config/axiosInstance';
-import type { TApiSuccessResponse } from '@/types/doctor';
+import type {
+  TApiError,
+  TApiSuccessResponse,
+  TMutationCallbacks,
+} from '@/types/api';
 import type { TPatient, TPatientUpdate } from '@/types/patient';
-
-type TMutationCallbacks<T = unknown> = {
-  onSuccess?: (data: T) => void;
-  onError?: (error: AxiosError<{ message?: string }>) => void;
-};
 
 // GET /patients/me
 export const useGetMyPatient = () => {
@@ -42,6 +40,6 @@ export const useUpdateMyPatient = ({
       queryClient.invalidateQueries({ queryKey: ['me'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError<{ message?: string }>),
+    onError: (error) => onError?.(error as TApiError),
   });
 };

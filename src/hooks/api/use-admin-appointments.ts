@@ -4,15 +4,14 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import { axiosInstance } from '@/config/axiosInstance';
+import type {
+  TApiError,
+  TApiSuccessResponse,
+  TMutationCallbacks,
+  TPaginateResponse,
+} from '@/types/api';
 import type { TAdminAppointment, TTransactionStatus } from '@/types/appointment';
-import type { TApiSuccessResponse, TPaginateResponse } from '@/types/doctor';
-
-type TMutationCallbacks<T = unknown> = {
-  onSuccess?: (data: T) => void;
-  onError?: (error: AxiosError) => void;
-};
 
 type TAdminAppointmentIndex = {
   status?: TTransactionStatus;
@@ -58,7 +57,7 @@ export const useApproveAppointment = ({
       queryClient.invalidateQueries({ queryKey: ['get-admin-appointments'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -80,6 +79,6 @@ export const useRejectAppointment = ({
       queryClient.invalidateQueries({ queryKey: ['get-admin-appointments'] });
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };

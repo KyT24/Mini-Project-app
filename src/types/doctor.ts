@@ -71,20 +71,3 @@ export type TDoctorCreate = {
 export type TDoctorUpdate = Partial<
   Omit<TDoctorCreate, 'email' | 'phone_number' | 'password'>
 >;
-
-export type TApiSuccessResponse<T> = {
-  success: true;
-  message: string;
-  data: T;
-};
-
-export type TPaginateMeta = {
-  page: number;
-  limit: number;
-  total: number;
-  total_pages: number;
-};
-
-export type TPaginateResponse<T> = TApiSuccessResponse<T[]> & {
-  meta: TPaginateMeta;
-};

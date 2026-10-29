@@ -1,24 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import { axiosInstance } from '@/config/axiosInstance';
-import type { TApiSuccessResponse } from '@/types/doctor';
+import type {
+  TApiError,
+  TApiSuccessResponse,
+  TMutationCallbacks,
+} from '@/types/api';
 import type {
   TAuthUser,
   TLogin,
   TLoginResponse,
   TRegister,
 } from '@/types/auth';
-
-type TMutationCallbacks<T = unknown> = {
-  onSuccess?: (data: T) => void;
-  onError?: (error: AxiosError<{ message?: string }>) => void;
-};
-
-/** Ambil pesan error dari response backend, atau fallback. */
-export const getApiErrorMessage = (
-  error: AxiosError<{ message?: string }>,
-  fallback: string,
-) => error.response?.data?.message || fallback;
 
 // POST /auth/login
 export const useLogin = ({
@@ -29,7 +21,6 @@ export const useLogin = ({
   return useMutation({
     mutationKey: ['login'],
     mutationFn: async (body: TLogin) => {
-      console.log(body)
       const { data } = await axiosInstance.post<
        TApiSuccessResponse<TLoginResponse>
       >('/auth/login', body);
@@ -39,7 +30,7 @@ export const useLogin = ({
       queryClient.setQueryData(['me'], response.data.user);
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError<{ message?: string }>),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -58,7 +49,7 @@ export const useRegister = ({
       return data;
     },
     onSuccess: (response) => onSuccess?.(response),
-    onError: (error) => onError?.(error as AxiosError<{ message?: string }>),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -77,7 +68,7 @@ export const useRegisterAdmin = ({
       return data;
     },
     onSuccess: (response) => onSuccess?.(response),
-    onError: (error) => onError?.(error as AxiosError<{ message?: string }>),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -92,7 +83,7 @@ export const useMe = () => {
           await axiosInstance.get<TApiSuccessResponse<TAuthUser>>('/auth/me');
         return data.data;
       } catch (error) {
-        if ((error as AxiosError).response?.status === 401) return null;
+        if ((error as TApiError).response?.status === 401) return null;
         throw error;
       }
     },
@@ -118,6 +109,6 @@ export const useLogout = ({
       queryClient.setQueryData(['me'], null);
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError<{ message?: string }>),
+    onError: (error) => onError?.(error as TApiError),
   });
 };

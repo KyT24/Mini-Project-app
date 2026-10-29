@@ -4,19 +4,17 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import { axiosInstance } from '@/config/axiosInstance';
-import type { TApiSuccessResponse } from '@/types/doctor';
+import type {
+  TApiError,
+  TApiSuccessResponse,
+  TMutationCallbacks,
+} from '@/types/api';
 import type {
   TDoctorSchedule,
   TScheduleCreate,
   TScheduleUpdate,
 } from '@/types/schedule';
-
-type TMutationCallbacks<T = unknown> = {
-  onSuccess?: (data: T) => void;
-  onError?: (error: AxiosError) => void;
-};
 
 // Jadwal tampil di daftar & profil dokter, jadi data dokter ikut dimuat ulang
 function invalidateSchedules(queryClient: QueryClient) {
@@ -57,7 +55,7 @@ export const useCreateSchedule = ({
       invalidateSchedules(queryClient);
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -79,7 +77,7 @@ export const useUpdateSchedule = ({
       invalidateSchedules(queryClient);
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
 
@@ -101,6 +99,6 @@ export const useDeleteSchedule = ({
       invalidateSchedules(queryClient);
       onSuccess?.(response);
     },
-    onError: (error) => onError?.(error as AxiosError),
+    onError: (error) => onError?.(error as TApiError),
   });
 };
