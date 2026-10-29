@@ -1,9 +1,6 @@
 import { MessageCircle } from 'lucide-react';
-import { waLink } from '@/components/user/landing-page/constants';
-import {
-  categories,
-  treatments,
-} from '@/components/user/landing-page/treatment';
+import { waLink } from '@/constants/contact';
+import { categories, treatments } from '@/constants/treatments';
 import {
   categoryIcons,
   TreatmentCard,

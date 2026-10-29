@@ -1,6 +1,3 @@
-'use client';
-
-import { useParams } from 'next/navigation';
 import { Suspense } from 'react';
 import PaymentUpload from '@/components/user/booking/payment-upload';
 import RequirePatient from '@/components/user/booking/require-patient';
@@ -17,16 +14,11 @@ export default function PaymentPage() {
           {/* useParams/usePathname di route dinamis perlu Suspense (cacheComponents) */}
           <Suspense>
             <RequirePatient>
-              <PaymentContent />
+              <PaymentUpload />
             </RequirePatient>
           </Suspense>
         </div>
       </div>
     </main>
   );
-}
-
-function PaymentContent() {
-  const { appointmentId } = useParams<{ appointmentId: string }>();
-  return <PaymentUpload appointmentId={appointmentId} />;
 }

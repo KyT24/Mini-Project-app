@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useMe } from '@/hooks/useAuth';
-import { card, primaryBtn, secondaryBtn } from './styles';
+import { useMe } from '@/hooks/api/use-auth';
+import { card, primaryBtn, secondaryBtn } from '@/lib/styles';
 
 type Props = { children: React.ReactNode };
 

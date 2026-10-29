@@ -1,16 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import {
-  getTreatmentBySlug,
-  treatments,
-} from '@/components/user/landing-page/treatment';
+import { getTreatmentBySlug, treatments } from '@/constants/treatments';
 import { categoryIcons } from '@/components/user/treatment/treatment-card';
-
-const primaryBtn =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#1B1B7A] px-6 py-3 font-bold text-white transition-colors hover:bg-[#12125c] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A]';
-
-const linkClass =
-  'font-semibold text-[#1B1B7A] underline decoration-[#F29A9A] decoration-2 underline-offset-4 hover:text-[#d96a6a] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A]';
+import { linkClass, primaryBtn } from '@/lib/styles';
 
 // Semua slug di-prerender saat build
 export function generateStaticParams() {

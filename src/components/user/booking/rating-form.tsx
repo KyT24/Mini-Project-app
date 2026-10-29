@@ -2,10 +2,10 @@
 
 import { Star } from 'lucide-react';
 import { useState } from 'react';
-import { getApiErrorMessage, getApiStatus } from '@/components/admin/doctor/utils';
-import { useRateAppointment } from '@/hooks/useAppointments';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
+import { useRateAppointment } from '@/hooks/api/use-appointments';
 import type { TAppointment } from '@/types/appointment';
-import { card, errorText, inputBase, primaryBtn } from './styles';
+import { card, errorText, inputBase, primaryBtn } from '@/lib/styles';
 
 const MAX_REVIEW = 500; // sama dengan backend
 

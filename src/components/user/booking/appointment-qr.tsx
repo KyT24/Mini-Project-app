@@ -2,7 +2,7 @@
 
 import { QRCodeSVG } from 'qrcode.react';
 import type { TAppointment } from '@/types/appointment';
-import { card } from './styles';
+import { card } from '@/lib/styles';
 
 type Props = { appointment: TAppointment };
 

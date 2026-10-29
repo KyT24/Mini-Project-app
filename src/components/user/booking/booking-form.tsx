@@ -2,11 +2,13 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { formatRupiah, getApiErrorMessage, getApiStatus } from '@/components/admin/doctor/utils';
-import { useCreateAppointment, useGetAvailability } from '@/hooks/useAppointments';
-import { useGetDoctors } from '@/hooks/useDoctors';
-import { card, errorText, inputBase, primaryBtn, secondaryBtn } from './styles';
-import { formatDate, getBookableDates } from './utils';
+import { formatRupiah } from '@/lib/format';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
+import { useCreateAppointment, useGetAvailability } from '@/hooks/api/use-appointments';
+import { useGetDoctors } from '@/hooks/api/use-doctors';
+import { card, errorText, inputBase, primaryBtn, secondaryBtn } from '@/lib/styles';
+import { formatDate } from '@/lib/format';
+import { getBookableDates } from './utils';
 
 type Props = {
   treatment: { slug: string; title: string };

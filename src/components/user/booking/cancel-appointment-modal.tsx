@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { getApiErrorMessage, getApiStatus } from '@/components/admin/doctor/utils';
-import Modal from '@/components/admin/modal';
-import { dangerBtn, secondaryBtn } from '@/components/admin/styles';
-import { useCancelAppointment } from '@/hooks/useAppointments';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
+import Modal from '@/components/ui/modal';
+import { dangerBtn, secondaryBtn } from '@/lib/styles';
+import { useCancelAppointment } from '@/hooks/api/use-appointments';
 import type { TAppointment } from '@/types/appointment';
 
 type Props = {

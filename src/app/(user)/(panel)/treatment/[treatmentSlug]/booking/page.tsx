@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import BookingForm from '@/components/user/booking/booking-form';
 import RequirePatient from '@/components/user/booking/require-patient';
-import { linkClass } from '@/components/user/booking/styles';
-import { getTreatmentBySlug, treatments } from '@/components/user/landing-page/treatment';
+import { linkClass } from '@/lib/styles';
+import { getTreatmentBySlug, treatments } from '@/constants/treatments';
 
 export function generateStaticParams() {
   return treatments.map((t) => ({ treatmentSlug: t.slug }));
