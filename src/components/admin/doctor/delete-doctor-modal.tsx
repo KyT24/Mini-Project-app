@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import Modal from '@/components/admin/modal';
+import Modal from '@/components/ui/modal';
 import { dangerBtn, secondaryBtn } from '@/components/admin/styles';
-import { useDeleteDoctor, useUpdateDoctor } from '@/hooks/useDoctors';
+import { useDeleteDoctor, useUpdateDoctor } from '@/hooks/api/use-doctors';
 import type { TDoctor } from '@/types/doctor';
-import { getApiErrorMessage, getApiStatus } from './utils';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
 
 type Props = {
   doctor: TDoctor;

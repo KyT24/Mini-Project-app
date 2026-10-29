@@ -1,7 +1,9 @@
 'use client';
 
 import { CircleUserRound, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useEscapeKey } from '@/hooks/use-escape-key';
+import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
 import Sidebar from './sidebar';
 
 const FOCUS =
@@ -14,18 +16,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Drawer mobile: tutup dengan Escape dan kunci scroll halaman
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMobileOpen(false);
-    };
-    document.addEventListener('keydown', onKey);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
-    };
-  }, [mobileOpen]);
+  useEscapeKey(mobileOpen, () => setMobileOpen(false));
+  useLockBodyScroll(mobileOpen);
 
   return (
     <div

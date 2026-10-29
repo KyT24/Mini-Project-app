@@ -1,16 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import Modal from '@/components/admin/modal';
-import { errorText, inputBase, primaryBtn, secondaryBtn } from '@/components/admin/styles';
-import { formatTime } from '@/components/user/booking/utils';
-import { DAYS, DAY_ORDER } from '@/components/user/doctor/constants';
+import Modal from '@/components/ui/modal';
+import { actionLink, errorText, inputBase, primaryBtn, secondaryBtn } from '@/components/admin/styles';
+import { formatTime } from '@/lib/format';
+import { DAYS, DAY_ORDER } from '@/lib/schedule';
 import {
   useCreateSchedule,
   useDeleteSchedule,
   useGetSchedules,
   useUpdateSchedule,
-} from '@/hooks/useSchedules';
+} from '@/hooks/api/use-schedules';
 import type { TDoctor } from '@/types/doctor';
 import type { TDoctorSchedule } from '@/types/schedule';
 import {
@@ -19,16 +19,13 @@ import {
   parseSchedule,
   type ScheduleFormValues,
 } from '@/validations/schedule/schedule.schema';
-import { getApiErrorMessage, getApiStatus } from './utils';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
 
 type Props = {
   doctor: TDoctor;
   onClose: () => void;
   onSuccess: (message: string) => void;
 };
-
-const actionLink =
-  'inline-flex min-h-11 items-center rounded-lg px-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] disabled:text-neutral-500';
 
 // Urut Senin → Minggu, lalu jam mulai
 const dayRank = (day: number) => DAY_ORDER.indexOf(day as (typeof DAY_ORDER)[number]);
@@ -246,7 +243,7 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
                       setErrors({});
                       setConfirmDeleteId(null);
                     }}
-                    className={`${actionLink} text-[#1B1B7A] hover:bg-neutral-100`}
+                    className={`${actionLink} disabled:text-neutral-500 text-[#1B1B7A] hover:bg-neutral-100`}
                   >
                     Ubah
                   </button>
@@ -254,7 +251,7 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
                     type="button"
                     disabled={isPending}
                     onClick={() => toggleActive(s)}
-                    className={`${actionLink} text-[#1B1B7A] hover:bg-neutral-100`}
+                    className={`${actionLink} disabled:text-neutral-500 text-[#1B1B7A] hover:bg-neutral-100`}
                   >
                     {s.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                   </button>
@@ -262,7 +259,7 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
                     type="button"
                     disabled={isPending}
                     onClick={() => handleDelete(s)}
-                    className={`${actionLink} text-red-700 hover:bg-red-50`}
+                    className={`${actionLink} disabled:text-neutral-500 text-red-700 hover:bg-red-50`}
                   >
                     {confirmDeleteId === s.id ? 'Yakin hapus?' : 'Hapus'}
                   </button>
@@ -270,7 +267,7 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
                     <button
                       type="button"
                       onClick={() => setConfirmDeleteId(null)}
-                      className={`${actionLink} text-neutral-700 hover:bg-neutral-100`}
+                      className={`${actionLink} disabled:text-neutral-500 text-neutral-700 hover:bg-neutral-100`}
                     >
                       Batal
                     </button>

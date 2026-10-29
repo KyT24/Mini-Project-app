@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { getApiErrorMessage, getApiStatus } from '@/components/admin/doctor/utils';
-import Modal from '@/components/admin/modal';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
+import Modal from '@/components/ui/modal';
 import { errorText, inputBase, primaryBtn, secondaryBtn } from '@/components/admin/styles';
-import { useCreateSpecialist, useUpdateSpecialist } from '@/hooks/useSpecialists';
+import { useCreateSpecialist, useUpdateSpecialist } from '@/hooks/api/use-specialists';
 import type { TSpecialist } from '@/types/specialist';
 import {
   EMPTY_SPECIALIST_FORM,

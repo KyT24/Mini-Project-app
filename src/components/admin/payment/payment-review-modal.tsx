@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { formatRupiah, getApiErrorMessage, getApiStatus } from '@/components/admin/doctor/utils';
-import Modal from '@/components/admin/modal';
+import { formatRupiah } from '@/lib/format';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
+import Modal from '@/components/ui/modal';
 import { dangerBtn, errorText, inputBase, primaryBtn, secondaryBtn } from '@/components/admin/styles';
-import { STATUS_META } from '@/components/user/booking/status';
-import { formatDate, formatTime } from '@/components/user/booking/utils';
-import { useApproveAppointment, useRejectAppointment } from '@/hooks/useAdminAppointments';
+import { STATUS_META } from '@/constants/transaction-status';
+import { formatDate, formatTime } from '@/lib/format';
+import { useApproveAppointment, useRejectAppointment } from '@/hooks/api/use-admin-appointments';
 import type { TAdminAppointment } from '@/types/appointment';
 
 const MAX_REASON = 500; // sama dengan backend

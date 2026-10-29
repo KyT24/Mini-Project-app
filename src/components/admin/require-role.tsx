@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { primaryBtn, secondaryBtn } from '@/components/admin/styles';
-import { useMe } from '@/hooks/useAuth';
+import { useMe } from '@/hooks/api/use-auth';
 import type { TRole } from '@/types/auth';
 
 type Props = {

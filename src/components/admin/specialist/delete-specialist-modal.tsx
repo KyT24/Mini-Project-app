@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { getApiErrorMessage, getApiStatus } from '@/components/admin/doctor/utils';
-import Modal from '@/components/admin/modal';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
+import Modal from '@/components/ui/modal';
 import { dangerBtn, secondaryBtn } from '@/components/admin/styles';
-import { useDeleteSpecialist, useUpdateSpecialist } from '@/hooks/useSpecialists';
+import { useDeleteSpecialist, useUpdateSpecialist } from '@/hooks/api/use-specialists';
 import type { TSpecialist } from '@/types/specialist';
 
 type Props = {

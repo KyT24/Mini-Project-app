@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Modal from '@/components/admin/modal';
+import Modal from '@/components/ui/modal';
 import { errorText, inputBase, primaryBtn, secondaryBtn } from '@/components/admin/styles';
-import { useCreateDoctor, useUpdateDoctor, useUploadDoctorPhoto } from '@/hooks/useDoctors';
-import { useGetSpecialists } from '@/hooks/useSpecialists';
+import { useCreateDoctor, useUpdateDoctor, useUploadDoctorPhoto } from '@/hooks/api/use-doctors';
+import { useGetSpecialists } from '@/hooks/api/use-specialists';
 import type { TDoctor, TDoctorCreate } from '@/types/doctor';
 import {
   type DoctorFormValues,
@@ -13,7 +13,7 @@ import {
   parseDoctorCreate,
   parseDoctorUpdate,
 } from '@/validations/doctor/doctor.schema';
-import { getApiErrorMessage, getApiStatus } from './utils';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
 
 // Sama dengan batas upload di backend (upload.middleware.ts)
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
