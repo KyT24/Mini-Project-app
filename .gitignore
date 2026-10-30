@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# catatan asisten AI (hanya lokal)
+CLAUDE.md
+.claude/
