@@ -8,7 +8,7 @@ import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
 import { inputBase, linkClass, primaryBtn, secondaryBtn } from '@/lib/styles';
 import RatingStars from '@/components/user/booking/rating-stars';
 import { formatDate, formatTime } from '@/lib/format';
-import { treatments } from '@/constants/treatments';
+import { isSpecialistForCategory, treatments } from '@/constants/treatments';
 import { useGetDetailDoctor } from '@/hooks/api/use-doctors';
 import { DAYS, DAY_ORDER } from '@/lib/schedule';
 
@@ -64,6 +64,10 @@ export function DoctorProfile() {
     day: day,
     items: schedules.filter((schedule) => schedule.day_of_week === day),
   })).filter((group) => group.items.length > 0);
+  // Hanya treatment yang kategorinya sama dengan spesialisasi dokter ini
+  const doctorTreatments = treatments.filter((treatment) =>
+    isSpecialistForCategory(doctor.specialists?.name, treatment.category),
+  );
   const canBook = scheduleDays.length > 0 && Boolean(treatmentSlug);
   const reviews = doctor.reviews ?? [];
 
@@ -179,12 +183,12 @@ export function DoctorProfile() {
           <select
             id="profile-treatment"
             value={treatmentSlug}
-            disabled={scheduleDays.length === 0}
+            disabled={scheduleDays.length === 0 || doctorTreatments.length === 0}
             onChange={(event) => setTreatmentSlug(event.target.value)}
             className={`mt-2 ${inputBase} border-neutral-300 disabled:bg-neutral-100`}
           >
             <option value="">Pilih treatment</option>
-            {treatments.map((treatment) => (
+            {doctorTreatments.map((treatment) => (
               <option key={treatment.slug} value={treatment.slug}>
                 {treatment.title}
               </option>
@@ -201,6 +205,11 @@ export function DoctorProfile() {
             <button type="button" disabled className={`mt-5 w-full sm:w-auto ${primaryBtn}`}>
               Booking
             </button>
+          )}
+          {doctorTreatments.length === 0 && (
+            <p className="mt-2 text-sm text-neutral-600">
+              Belum ada treatment yang sesuai dengan spesialisasi dokter ini.
+            </p>
           )}
           {scheduleDays.length === 0 && (
             <p className="mt-2 text-sm text-neutral-600">

@@ -129,3 +129,15 @@ export const featuredTreatments = treatments.filter((treatment) => treatment.fea
 export function getTreatmentBySlug(slug: string) {
   return treatments.find((treatment) => treatment.slug === slug);
 }
+
+// Samakan penulisan nama: "Acne And Scar", "acne & scar" → "acne and scar"
+function normalizeName(name: string) {
+  return name.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, ' ').trim();
+}
+
+// Spesialisasi dokter = kategori treatment yang ditangani (mis. spesialis "Acne And Scar"
+// menangani semua treatment kategori "Acne & Scar")
+export function isSpecialistForCategory(specialistName: string | undefined, category: Category) {
+  if (!specialistName) return false;
+  return normalizeName(specialistName) === normalizeName(category);
+}

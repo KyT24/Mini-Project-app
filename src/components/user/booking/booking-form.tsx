@@ -8,10 +8,11 @@ import { useCreateAppointment, useGetAvailability } from '@/hooks/api/use-appoin
 import { useGetDoctors } from '@/hooks/api/use-doctors';
 import { card, errorText, inputBase, primaryBtn, secondaryBtn } from '@/lib/styles';
 import { formatDate } from '@/lib/format';
+import { isSpecialistForCategory, type Category } from '@/constants/treatments';
 import { getBookableDates } from './utils';
 
 type Props = {
-  treatment: { slug: string; title: string };
+  treatment: { slug: string; title: string; category: Category };
 };
 
 type Errors = { doctor?: string; date?: string; slot?: string };
@@ -23,14 +24,25 @@ export default function BookingForm({ treatment }: Props) {
   const expired = searchParams.get('expired') === '1';
   const dates = useMemo(() => getBookableDates(), []);
   // Dokter sudah terpilih bila datang dari halaman profil dokter (?doctor=)
-  const [doctorId, setDoctorId] = useState(() => searchParams.get('doctor') ?? '');
+  const [pickedDoctorId, setDoctorId] = useState(() => searchParams.get('doctor') ?? '');
   const [date, setDate] = useState(dates[0]);
   const [startTime, setStartTime] = useState('');
   const [errors, setErrors] = useState<Errors>({});
   const [serverError, setServerError] = useState('');
 
   const doctorsQuery = useGetDoctors({ is_active: true, limit: 100, sort: 'experience_desc' });
-  const doctors = doctorsQuery.data?.data ?? [];
+  const allDoctors = doctorsQuery.data?.data ?? [];
+
+  // Hanya dokter yang spesialisasinya sama dengan kategori treatment ini
+  const doctors = allDoctors.filter((doctor) =>
+    isSpecialistForCategory(doctor.specialists?.name, treatment.category),
+  );
+
+  // Dokter dari link profil (?doctor=) yang bukan spesialis treatment ini diabaikan
+  let doctorId = '';
+  if (doctors.some((doctor) => doctor.id === pickedDoctorId)) {
+    doctorId = pickedDoctorId;
+  }
   const selectedDoctor = doctors.find((doctor) => doctor.id === doctorId);
 
   const availability = useGetAvailability(doctorId || undefined, date);
@@ -231,6 +243,11 @@ export default function BookingForm({ treatment }: Props) {
           {errors.doctor && (
             <p id="booking-doctor-error" role="alert" className={errorText}>
               {errors.doctor}
+            </p>
+          )}
+          {doctorsQuery.isSuccess && doctors.length === 0 && (
+            <p className="mt-2 text-sm text-neutral-700">
+              Belum ada dokter spesialis {treatment.category} yang tersedia untuk treatment ini.
             </p>
           )}
           {doctorsQuery.isError && (

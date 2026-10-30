@@ -41,7 +41,13 @@ export default async function BookingPage({ params }: PageProps<'/treatment/[tre
           {/* RequirePatient & BookingForm membaca usePathname/useSearchParams */}
           <Suspense>
             <RequirePatient>
-              <BookingForm treatment={{ slug: treatment.slug, title: treatment.title }} />
+              <BookingForm
+                treatment={{
+                  slug: treatment.slug,
+                  title: treatment.title,
+                  category: treatment.category,
+                }}
+              />
             </RequirePatient>
           </Suspense>
         </div>
