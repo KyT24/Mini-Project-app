@@ -100,13 +100,13 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile }: Props)
 
       {/* MENU */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        {NAV_GROUPS.map((group, i) => {
-          const headingId = `admin-nav-${i}`;
+        {NAV_GROUPS.map((group, index) => {
+          const headingId = `admin-nav-${index}`;
           return (
             <div
               key={group.title}
               className={
-                i > 0
+                index > 0
                   ? `mt-5 ${collapsed ? 'lg:mt-3 lg:border-t lg:border-neutral-200 lg:pt-3' : ''}`
                   : ''
               }

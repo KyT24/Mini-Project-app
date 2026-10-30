@@ -26,8 +26,8 @@ export default function RatingForm({ appointment }: Props) {
       ),
   });
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
     if (!rating) {
       setRatingError('Pilih rating 1 sampai 5.');
@@ -63,18 +63,18 @@ export default function RatingForm({ appointment }: Props) {
         </legend>
         {/* Radio asli agar bisa dipilih dengan tombol panah */}
         <div className="mt-2 flex gap-1">
-          {[1, 2, 3, 4, 5].map((n) => (
+          {[1, 2, 3, 4, 5].map((star) => (
             <label
-              key={n}
+              key={star}
               className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-[#1B1B7A]"
             >
               <input
                 type="radio"
                 name="rating"
-                value={n}
-                checked={rating === n}
+                value={star}
+                checked={rating === star}
                 onChange={() => {
-                  setRating(n);
+                  setRating(star);
                   setRatingError('');
                 }}
                 disabled={rate.isPending}
@@ -82,9 +82,9 @@ export default function RatingForm({ appointment }: Props) {
               />
               <Star
                 aria-hidden="true"
-                className={`h-8 w-8 ${n <= rating ? 'fill-amber-500 text-amber-600' : 'text-neutral-500'}`}
+                className={`h-8 w-8 ${star <= rating ? 'fill-amber-500 text-amber-600' : 'text-neutral-500'}`}
               />
-              <span className="sr-only">{n} bintang</span>
+              <span className="sr-only">{star} bintang</span>
             </label>
           ))}
         </div>
@@ -103,7 +103,7 @@ export default function RatingForm({ appointment }: Props) {
         rows={4}
         maxLength={MAX_REVIEW}
         value={review}
-        onChange={(e) => setReview(e.target.value)}
+        onChange={(event) => setReview(event.target.value)}
         disabled={rate.isPending}
         aria-describedby="review-count"
         className={`mt-2 ${inputBase} border-neutral-300`}

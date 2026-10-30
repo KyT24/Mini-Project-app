@@ -70,7 +70,7 @@ export const useGetDoctors = (
 // GET /doctors/:id
 export const useGetDetailDoctor = (id?: string) => {
   return useQuery<TApiSuccessResponse<TDoctor>>({
-    enabled: !!id,
+    enabled: Boolean(id),
     queryKey: ['get-detail-doctor', id],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/doctors/${id}`);

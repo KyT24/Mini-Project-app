@@ -60,11 +60,11 @@ export function DoctorProfile() {
 
   const image = doctor.photo ?? doctor.users?.profile_picture;
   const schedules = doctor.doctor_schedules ?? [];
-  const scheduleDays = DAY_ORDER.map((d) => ({
-    day: d,
-    items: schedules.filter((s) => s.day_of_week === d),
-  })).filter((d) => d.items.length > 0);
-  const canBook = scheduleDays.length > 0 && !!treatmentSlug;
+  const scheduleDays = DAY_ORDER.map((day) => ({
+    day: day,
+    items: schedules.filter((schedule) => schedule.day_of_week === day),
+  })).filter((group) => group.items.length > 0);
+  const canBook = scheduleDays.length > 0 && Boolean(treatmentSlug);
   const reviews = doctor.reviews ?? [];
 
   return (
@@ -150,12 +150,12 @@ export function DoctorProfile() {
                 <li key={day} className="flex flex-col gap-1 py-3 sm:flex-row sm:justify-between">
                   <span className="font-semibold text-neutral-900">{DAYS[day]}</span>
                   <ul className="text-neutral-700 sm:text-right">
-                    {items.map((s) => (
-                      <li key={s.id}>
-                        {formatTime(s.start_time)}–{formatTime(s.end_time)} WIB
+                    {items.map((schedule) => (
+                      <li key={schedule.id}>
+                        {formatTime(schedule.start_time)}–{formatTime(schedule.end_time)} WIB
                         <span className="text-sm text-neutral-600">
                           {' '}
-                          · kuota {s.patient_quota} pasien
+                          · kuota {schedule.patient_quota} pasien
                         </span>
                       </li>
                     ))}
@@ -180,13 +180,13 @@ export function DoctorProfile() {
             id="profile-treatment"
             value={treatmentSlug}
             disabled={scheduleDays.length === 0}
-            onChange={(e) => setTreatmentSlug(e.target.value)}
+            onChange={(event) => setTreatmentSlug(event.target.value)}
             className={`mt-2 ${inputBase} border-neutral-300 disabled:bg-neutral-100`}
           >
             <option value="">Pilih treatment</option>
-            {treatments.map((t) => (
-              <option key={t.slug} value={t.slug}>
-                {t.title}
+            {treatments.map((treatment) => (
+              <option key={treatment.slug} value={treatment.slug}>
+                {treatment.title}
               </option>
             ))}
           </select>
@@ -216,18 +216,18 @@ export function DoctorProfile() {
             Ulasan pasien
           </h2>
           <ul className="mt-4 divide-y divide-neutral-200">
-            {reviews.map((r) => (
-              <li key={r.id} className="py-4">
+            {reviews.map((review) => (
+              <li key={review.id} className="py-4">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <RatingStars value={r.rating} />
+                  <RatingStars value={review.rating} />
                   {/* Hanya nama depan untuk menjaga privasi pasien */}
                   <span className="font-semibold text-neutral-900">
-                    {r.patient_profiles.users.full_name.split(' ')[0]}
+                    {review.patient_profiles.users.full_name.split(' ')[0]}
                   </span>
-                  <span className="text-sm text-neutral-600">{formatDate(r.created_at)}</span>
+                  <span className="text-sm text-neutral-600">{formatDate(review.created_at)}</span>
                 </div>
-                {r.review && (
-                  <p className="mt-2 whitespace-pre-line text-neutral-700">{r.review}</p>
+                {review.review && (
+                  <p className="mt-2 whitespace-pre-line text-neutral-700">{review.review}</p>
                 )}
               </li>
             ))}

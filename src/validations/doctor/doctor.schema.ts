@@ -23,7 +23,7 @@ const doctorBaseSchema = z.object({
     .trim()
     .min(1, 'Pengalaman wajib diisi')
     .regex(/^\d+$/, 'Pengalaman harus berupa angka bulat 0 atau lebih')
-    .refine((v) => Number(v) <= 80, 'Pengalaman maksimal 80 tahun'),
+    .refine((value) => Number(value) <= 80, 'Pengalaman maksimal 80 tahun'),
   consultation_fee: z
     .string()
     .trim()
@@ -78,8 +78,9 @@ export function parseDoctorCreate(values: DoctorFormValues):
   | { success: true; data: TDoctorCreate }
   | { success: false; errors: FieldErrors<DoctorFormValues> } {
   const result = doctorCreateFormSchema.safeParse(values);
-  if (!result.success)
+  if (!result.success) {
     return { success: false, errors: toFieldErrors(result.error) };
+  }
   return {
     success: true,
     data: {
@@ -95,7 +96,8 @@ export function parseDoctorUpdate(values: DoctorFormValues):
   | { success: true; data: TDoctorUpdate }
   | { success: false; errors: FieldErrors<DoctorFormValues> } {
   const result = doctorUpdateFormSchema.safeParse(values);
-  if (!result.success)
+  if (!result.success) {
     return { success: false, errors: toFieldErrors(result.error) };
+  }
   return { success: true, data: toPayload(result.data) };
 }

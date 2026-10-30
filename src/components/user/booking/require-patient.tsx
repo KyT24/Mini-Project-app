@@ -14,14 +14,15 @@ export default function RequirePatient({ children }: Props) {
 
   if (user?.role === 'PATIENT') return <>{children}</>;
 
-  if (isPending)
+  if (isPending) {
     return (
       <p role="status" className={`${card} text-center text-neutral-600`}>
         Memeriksa akun...
       </p>
     );
+  }
 
-  if (isError)
+  if (isError) {
     return (
       <div role="alert" className={`${card} text-center`}>
         <p className="text-neutral-700">Tidak dapat memeriksa akun. Periksa koneksi lalu coba lagi.</p>
@@ -30,8 +31,9 @@ export default function RequirePatient({ children }: Props) {
         </button>
       </div>
     );
+  }
 
-  if (!user)
+  if (!user) {
     return (
       <div className={`${card} text-center`}>
         <h2 className="text-2xl font-bold tracking-tight text-[#1B1B7A]">Masuk untuk reservasi</h2>
@@ -48,6 +50,7 @@ export default function RequirePatient({ children }: Props) {
         </div>
       </div>
     );
+  }
 
   return (
     <div role="alert" className={`${card} text-center`}>

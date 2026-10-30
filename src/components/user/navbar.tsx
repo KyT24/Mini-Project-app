@@ -59,14 +59,42 @@ export default function Navbar() {
   useEffect(() => {
     if (!open) return;
     const mq = window.matchMedia('(min-width: 1024px)');
-    const onChange = (e: MediaQueryListEvent) => {
-      if (e.matches) setOpen(false);
+    const onChange = (event: MediaQueryListEvent) => {
+      if (event.matches) setOpen(false);
     };
     mq.addEventListener('change', onChange);
     return () => mq.removeEventListener('change', onChange);
   }, [open]);
 
   const close = () => setOpen(false);
+
+  // Area akun: loading → sudah login (menu akun) → belum login (tombol Masuk)
+  let accountContent;
+  if (isLoadingMe) {
+    accountContent = (
+      <span
+        aria-hidden="true"
+        className="h-9 w-9 animate-pulse rounded-full bg-neutral-200 lg:order-last"
+      />
+    );
+  } else if (user) {
+    accountContent = (
+      <AccountMenu
+        user={user}
+        onLogout={() => logout()}
+        isLoggingOut={isLoggingOut}
+      />
+    );
+  } else {
+    accountContent = (
+      <Link
+        href="/login"
+        className="inline-flex h-11 items-center rounded-full border-2 border-[#1B1B7A] px-4 text-sm font-bold text-[#1B1B7A] transition-colors hover:bg-[#1B1B7A] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] lg:order-last"
+      >
+        Masuk
+      </Link>
+    );
+  }
 
   return (
     <>
@@ -107,18 +135,18 @@ export default function Navbar() {
 
           {/* LINK DESKTOP (lg+) */}
           <ul className="hidden items-center gap-8 lg:flex">
-            {links.map((l) => (
-              <li key={l.href}>
+            {links.map((link) => (
+              <li key={link.href}>
                 <Link
-                  href={l.href}
-                  aria-current={isActive(l.href) ? 'page' : undefined}
+                  href={link.href}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                   className={`relative rounded py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A] after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-[#C5A46D] after:transition-opacity ${
-                    isActive(l.href)
+                    isActive(link.href)
                       ? 'text-[#1B1B7A] after:opacity-100'
                       : 'text-neutral-700 after:opacity-0 hover:text-[#1B1B7A]'
                   }`}
                 >
-                  {l.label}
+                  {link.label}
                 </Link>
               </li>
             ))}
@@ -126,31 +154,13 @@ export default function Navbar() {
 
           <div className="flex items-center gap-2">
             {/* AKUN: foto profil + menu, atau tombol Masuk → /login */}
-            {isLoadingMe ? (
-              <span
-                aria-hidden="true"
-                className="h-9 w-9 animate-pulse rounded-full bg-neutral-200 lg:order-last"
-              />
-            ) : user ? (
-              <AccountMenu
-                user={user}
-                onLogout={() => logout()}
-                isLoggingOut={isLoggingOut}
-              />
-            ) : (
-              <Link
-                href="/login"
-                className="inline-flex h-11 items-center rounded-full border-2 border-[#1B1B7A] px-4 text-sm font-bold text-[#1B1B7A] transition-colors hover:bg-[#1B1B7A] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] lg:order-last"
-              >
-                Masuk
-              </Link>
-            )}
+            {accountContent}
 
             {/* HAMBURGER (< lg), target sentuh 44px */}
             <button
               ref={buttonRef}
               type="button"
-              onClick={() => setOpen((o) => !o)}
+              onClick={() => setOpen((previous) => !previous)}
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? 'Tutup menu' : 'Buka menu'}
@@ -203,20 +213,20 @@ export default function Navbar() {
           )}
 
           <ul className="mx-auto w-full max-w-6xl px-5 py-2 md:px-8">
-            {links.map((l) => (
+            {links.map((link) => (
               <li
-                key={l.href}
+                key={link.href}
                 className="border-b border-neutral-200 last:border-0"
               >
                 <Link
-                  href={l.href}
+                  href={link.href}
                   onClick={close}
-                  aria-current={isActive(l.href) ? 'page' : undefined}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                   className={`flex items-center justify-between py-4 text-lg text-[#1B1B7A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] ${
-                    isActive(l.href) ? 'font-bold' : 'font-medium'
+                    isActive(link.href) ? 'font-bold' : 'font-medium'
                   }`}
                 >
-                  {l.label}
+                  {link.label}
                   <svg
                     width="18"
                     height="18"

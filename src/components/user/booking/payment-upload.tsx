@@ -38,14 +38,15 @@ export default function PaymentUpload() {
   const [expiredByServer, setExpiredByServer] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
 
-  if (isPending)
+  if (isPending) {
     return (
       <p role="status" className={`${card} text-center text-neutral-600`}>
         Memuat data reservasi...
       </p>
     );
+  }
 
-  if (isError || !appointment)
+  if (isError || !appointment) {
     return (
       <div role="alert" className={`${card} text-center`}>
         <p className="text-red-900">
@@ -65,6 +66,7 @@ export default function PaymentUpload() {
         </div>
       </div>
     );
+  }
 
   const bookingHref = `/treatment/${appointment.treatments.slug}/booking`;
   const isExpired =
@@ -90,7 +92,7 @@ export default function PaymentUpload() {
     />
   );
 
-  if (isExpired || appointment.status === 'rejected')
+  if (isExpired || appointment.status === 'rejected') {
     return (
       <div className="grid gap-6">
         <div role="alert" className={`${card} border-amber-300 bg-amber-50 text-amber-950`}>
@@ -114,8 +116,9 @@ export default function PaymentUpload() {
         {summary}
       </div>
     );
+  }
 
-  if (appointment.status === 'canceled')
+  if (appointment.status === 'canceled') {
     return (
       <div className="grid gap-6">
         <div role="status" className={`${card} bg-neutral-50`}>
@@ -138,8 +141,9 @@ export default function PaymentUpload() {
         {summary}
       </div>
     );
+  }
 
-  if (appointment.status === 'waiting_confirmation')
+  if (appointment.status === 'waiting_confirmation') {
     return (
       <div className="grid gap-6">
         <div role="status" className={`${card} border-blue-300 bg-blue-50 text-blue-950`}>
@@ -159,8 +163,9 @@ export default function PaymentUpload() {
         {cancelModal}
       </div>
     );
+  }
 
-  if (appointment.status === 'done')
+  if (appointment.status === 'done') {
     return (
       <div className="grid gap-6">
         <AppointmentQr appointment={appointment} />
@@ -185,6 +190,7 @@ export default function PaymentUpload() {
         {cancelModal}
       </div>
     );
+  }
 
   return (
     <div className="grid gap-6">

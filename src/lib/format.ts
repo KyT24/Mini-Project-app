@@ -1,21 +1,17 @@
 /** "Dirga Saputra" → "DS" */
 export function getInitials(name: string) {
-  return (
-    name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join('')
-      .toUpperCase() || '?'
-  );
+  const words = name.trim().split(/\s+/); // "Dirga Saputra" → ["Dirga", "Saputra"]
+  const firstTwoWords = words.slice(0, 2);
+  const initials = firstTwoWords.map((word) => word[0]).join('').toUpperCase();
+  // Nama kosong → tampilkan "?"
+  return initials || '?';
 }
 
 /** 150000 atau "150000.00" → "Rp150.000" */
 export function formatRupiah(value: string | number) {
-  const n = Number(value);
-  if (Number.isNaN(n)) return '-';
-  return n.toLocaleString('id-ID', {
+  const amount = Number(value);
+  if (Number.isNaN(amount)) return '-';
+  return amount.toLocaleString('id-ID', {
     style: 'currency',
     currency: 'IDR',
     maximumFractionDigits: 0,
@@ -40,7 +36,10 @@ export function formatTime(time: string) {
 
 /** 125 → "02:05" */
 export function formatCountdown(seconds: number) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  // padStart menambah 0 di depan: "2" → "02"
+  const mm = String(minutes).padStart(2, '0');
+  const ss = String(remainingSeconds).padStart(2, '0');
+  return `${mm}:${ss}`;
 }

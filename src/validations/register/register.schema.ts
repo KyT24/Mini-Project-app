@@ -13,7 +13,7 @@ const confirmPasswordField = z.string().min(1, 'Konfirmasi password wajib diisi'
 
 const agreeField = z
   .boolean()
-  .refine((v) => v, { message: 'Anda perlu menyetujui syarat dan ketentuan' });
+  .refine((value) => value, { message: 'Anda perlu menyetujui syarat dan ketentuan' });
 
 export const registerSchema = z
   .object({
@@ -24,7 +24,7 @@ export const registerSchema = z
     confirmPassword: confirmPasswordField,
     agree: agreeField,
   })
-  .refine((v) => !v.confirmPassword || v.confirmPassword === v.password, {
+  .refine((values) => !values.confirmPassword || values.confirmPassword === values.password, {
     path: ['confirmPassword'],
     message: 'Password tidak sama',
   });

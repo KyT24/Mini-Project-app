@@ -23,23 +23,24 @@ export function AppointmentList() {
 
   // Jam hanya berdetik bila ada reservasi yang masih menunggu pembayaran
   const hasActiveHold = appointments.some(
-    (a) => a.status === 'waiting_payment' && a.remaining_seconds > 0,
+    (appointment) => appointment.status === 'waiting_payment' && appointment.remaining_seconds > 0,
   );
   const now = useNow(hasActiveHold);
 
-  if (isPending)
+  if (isPending) {
     return (
       <ul aria-busy="true" aria-label="Memuat riwayat reservasi" className="grid gap-4">
-        {Array.from({ length: 3 }).map((_, i) => (
+        {Array.from({ length: 3 }).map((_, index) => (
           <li
-            key={i}
+            key={index}
             className="h-40 animate-pulse rounded-3xl bg-neutral-200 motion-reduce:animate-none"
           />
         ))}
       </ul>
     );
+  }
 
-  if (isError)
+  if (isError) {
     return (
       <div role="alert" className={card}>
         <p className="text-red-900">
@@ -50,8 +51,9 @@ export function AppointmentList() {
         </button>
       </div>
     );
+  }
 
-  if (appointments.length === 0)
+  if (appointments.length === 0) {
     return (
       <section className={`${card} text-center`}>
         <h2 className="text-xl font-bold text-[#1B1B7A]">Belum ada reservasi</h2>
@@ -68,17 +70,18 @@ export function AppointmentList() {
         </div>
       </section>
     );
+  }
 
   return (
     <>
       <ul aria-busy={isFetching} className={`grid gap-4 ${isFetching ? 'opacity-60' : ''}`}>
-        {appointments.map((a) => (
-          <li key={a.id}>
+        {appointments.map((appointment) => (
+          <li key={appointment.id}>
             <AppointmentCard
-              appointment={a}
+              appointment={appointment}
               remaining={
-                a.status === 'waiting_payment'
-                  ? getRemainingSeconds(a.remaining_seconds, dataUpdatedAt, now)
+                appointment.status === 'waiting_payment'
+                  ? getRemainingSeconds(appointment.remaining_seconds, dataUpdatedAt, now)
                   : 0
               }
             />

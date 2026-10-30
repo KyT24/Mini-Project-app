@@ -26,8 +26,8 @@ export default function Modal({ title, titleId, onClose, locked, children }: Pro
       ref={dialogRef}
       aria-labelledby={titleId}
       onClose={onClose}
-      onCancel={(e) => {
-        if (locked) e.preventDefault();
+      onCancel={(event) => {
+        if (locked) event.preventDefault();
       }}
       className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl bg-white p-0 text-neutral-900 backdrop:bg-neutral-900/50"
     >

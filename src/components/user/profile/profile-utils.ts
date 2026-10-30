@@ -19,42 +19,48 @@ export const GENDER_LABEL: Record<TGender, string> = {
 };
 
 // Ubah response backend ke bentuk form
-export function toProfile(p: TPatient): Profile {
+export function toProfile(patient: TPatient): Profile {
   return {
-    name: p.full_name,
-    email: p.email,
-    phone: p.phone_number,
-    birthDate: p.patient_profiles?.date_of_birth?.slice(0, 10) ?? '',
-    gender: p.patient_profiles?.gender ?? '',
-    address: p.patient_profiles?.address ?? '',
+    name: patient.full_name,
+    email: patient.email,
+    phone: patient.phone_number,
+    birthDate: patient.patient_profiles?.date_of_birth?.slice(0, 10) ?? '',
+    gender: patient.patient_profiles?.gender ?? '',
+    address: patient.patient_profiles?.address ?? '',
   };
 }
 
 /** "1995-08-17" → "17 Agustus 1995"; kosong / tidak valid → "-" */
 export function formatBirthDate(value: string) {
   if (!value) return '-';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return '-';
-  return d.toLocaleDateString('id-ID', {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
 }
 
-export function validateProfile(p: Profile): ProfileErrors {
-  const e: ProfileErrors = {};
-  if (!p.name.trim()) e.name = 'Nama lengkap wajib diisi';
+export function validateProfile(profile: Profile): ProfileErrors {
+  const newErrors: ProfileErrors = {};
+  if (!profile.name.trim()) newErrors.name = 'Nama lengkap wajib diisi';
 
-  if (!p.email.trim()) e.email = 'Email wajib diisi';
-  else if (!/^\S+@\S+\.\S+$/.test(p.email)) e.email = 'Format email tidak valid';
+  if (!profile.email.trim()) {
+    newErrors.email = 'Email wajib diisi';
+  } else if (!/^\S+@\S+\.\S+$/.test(profile.email)) {
+    newErrors.email = 'Format email tidak valid';
+  }
 
-  if (!p.phone.trim()) e.phone = 'Nomor WhatsApp wajib diisi';
-  else if (!/^(\+62|62|0)8\d{8,11}$/.test(p.phone.replace(/[\s-]/g, '')))
-    e.phone = 'Nomor tidak valid. Contoh: 081234567890';
+  if (!profile.phone.trim()) {
+    newErrors.phone = 'Nomor WhatsApp wajib diisi';
+  } else if (!/^(\+62|62|0)8\d{8,11}$/.test(profile.phone.replace(/[\s-]/g, ''))) {
+    newErrors.phone = 'Nomor tidak valid. Contoh: 081234567890';
+  }
 
-  if (p.birthDate && new Date(p.birthDate) > new Date())
-    e.birthDate = 'Tanggal lahir tidak boleh di masa depan';
+  if (profile.birthDate && new Date(profile.birthDate) > new Date()) {
+    newErrors.birthDate = 'Tanggal lahir tidak boleh di masa depan';
+  }
 
-  return e;
+  return newErrors;
 }

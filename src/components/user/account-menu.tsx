@@ -23,7 +23,7 @@ export function Avatar({
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
+    .map((word) => word[0]?.toUpperCase())
     .join('');
   return user.avatarUrl ? (
     <img
@@ -63,8 +63,8 @@ export function AccountMenu({
 
   useEffect(() => {
     if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    const onClick = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
@@ -81,7 +81,7 @@ export function AccountMenu({
       <button
         ref={buttonRef}
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen((previous) => !previous)}
         aria-expanded={open}
         aria-controls="account-menu"
         aria-label={`Menu akun ${user.name}`}
@@ -103,14 +103,14 @@ export function AccountMenu({
             <p className="truncate text-sm text-neutral-600">{user.email}</p>
           </div>
           <ul className="py-1">
-            {accountLinks.map((l) => (
-              <li key={l.href}>
+            {accountLinks.map((link) => (
+              <li key={link.href}>
                 <Link
-                  href={l.href}
+                  href={link.href}
                   onClick={() => setOpen(false)}
                   className={itemClass}
                 >
-                  {l.label}
+                  {link.label}
                 </Link>
               </li>
             ))}

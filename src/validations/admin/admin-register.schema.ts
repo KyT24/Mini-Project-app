@@ -18,7 +18,7 @@ export const adminRegisterSchema = z
     password: passwordField,
     confirmPassword: z.string().min(1, 'Konfirmasi password wajib diisi'),
   })
-  .refine((v) => !v.confirmPassword || v.confirmPassword === v.password, {
+  .refine((values) => !values.confirmPassword || values.confirmPassword === values.password, {
     path: ['confirmPassword'],
     message: 'Password tidak sama',
   });
@@ -38,8 +38,9 @@ export function parseAdminRegister(values: AdminRegisterValues):
   | { success: true; data: TRegister }
   | { success: false; errors: FieldErrors<AdminRegisterValues> } {
   const result = adminRegisterSchema.safeParse(values);
-  if (!result.success)
+  if (!result.success) {
     return { success: false, errors: toFieldErrors(result.error) };
+  }
 
   // confirmPassword hanya untuk validasi, tidak dikirim ke backend
   const { full_name, email, phone_number, password } = result.data;

@@ -7,7 +7,7 @@ import { linkClass } from '@/lib/styles';
 import { getTreatmentBySlug, treatments } from '@/constants/treatments';
 
 export function generateStaticParams() {
-  return treatments.map((t) => ({ treatmentSlug: t.slug }));
+  return treatments.map((treatment) => ({ treatmentSlug: treatment.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<'/treatment/[treatmentSlug]/booking'>) {

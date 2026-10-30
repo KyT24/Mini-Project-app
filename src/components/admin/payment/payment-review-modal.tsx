@@ -56,8 +56,8 @@ export default function PaymentReviewModal({ appointment, onClose, onSuccess }: 
 
   const isPending = approve.isPending || reject.isPending;
 
-  function handleReject(e: React.FormEvent) {
-    e.preventDefault();
+  function handleReject(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
     if (!reason.trim()) {
       setReasonError('Alasan penolakan wajib diisi.');
@@ -159,12 +159,12 @@ export default function PaymentReviewModal({ appointment, onClose, onSuccess }: 
             rows={3}
             maxLength={MAX_REASON}
             value={reason}
-            onChange={(e) => {
-              setReason(e.target.value);
+            onChange={(event) => {
+              setReason(event.target.value);
               setReasonError('');
             }}
             disabled={isPending}
-            aria-invalid={!!reasonError}
+            aria-invalid={Boolean(reasonError)}
             aria-describedby={reasonError ? 'reject-reason-error' : undefined}
             placeholder="Contoh: nominal transfer kurang"
             className={`mt-2 ${inputBase} ${reasonError ? 'border-red-700' : 'border-neutral-300'}`}

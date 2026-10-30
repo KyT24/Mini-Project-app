@@ -58,8 +58,8 @@ export default function AdminLoginForm() {
     setErrors((prev) => ({ ...prev, [field]: message }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
     const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) {
@@ -97,12 +97,12 @@ export default function AdminLoginForm() {
             autoComplete="username"
             placeholder="admin@klinik.com"
             value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (errors.email) setFieldError('email', validateEmail(e.target.value));
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (errors.email) setFieldError('email', validateEmail(event.target.value));
             }}
             onBlur={() => setFieldError('email', validateEmail(email))}
-            aria-invalid={!!errors.email}
+            aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? 'admin-email-error' : undefined}
             className={inputClass(errors.email)}
           />

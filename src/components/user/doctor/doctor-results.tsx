@@ -28,9 +28,9 @@ export function DoctorResults({
   if (isPending) {
     return (
       <ul aria-busy="true" aria-label="Memuat data dokter" className={gridClass}>
-        {Array.from({ length: 4 }).map((_, i) => (
+        {Array.from({ length: 4 }).map((_, index) => (
           <li
-            key={i}
+            key={index}
             className="h-96 animate-pulse rounded-2xl bg-neutral-100 motion-reduce:animate-none md:rounded-3xl"
           />
         ))}

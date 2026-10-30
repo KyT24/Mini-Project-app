@@ -26,7 +26,7 @@ function invalidateSchedules(queryClient: QueryClient) {
 // GET /schedules?doctor_id= — semua jadwal (aktif & nonaktif)
 export const useGetSchedules = (doctorId?: string) => {
   return useQuery<TApiSuccessResponse<TDoctorSchedule[]>>({
-    enabled: !!doctorId,
+    enabled: Boolean(doctorId),
     queryKey: ['get-schedules', doctorId],
     queryFn: async () => {
       const { data } = await axiosInstance.get('/schedules', {

@@ -30,9 +30,13 @@ type Props = {
 // Urut Senin → Minggu, lalu jam mulai
 const dayRank = (day: number) => DAY_ORDER.indexOf(day as (typeof DAY_ORDER)[number]);
 const sortSchedules = (items: TDoctorSchedule[]) =>
-  [...items].sort(
-    (a, b) => dayRank(a.day_of_week) - dayRank(b.day_of_week) || a.start_time.localeCompare(b.start_time),
-  );
+  [...items].sort((scheduleA, scheduleB) => {
+    // Beda hari: urutkan berdasarkan hari
+    const dayDifference = dayRank(scheduleA.day_of_week) - dayRank(scheduleB.day_of_week);
+    if (dayDifference !== 0) return dayDifference;
+    // Hari sama: urutkan berdasarkan jam mulai ("08:00" < "13:00")
+    return scheduleA.start_time.localeCompare(scheduleB.start_time);
+  });
 
 function toFormValues(schedule: TDoctorSchedule): ScheduleFormValues {
   return {
@@ -70,7 +74,7 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
   }
 
   function fieldProps(field: keyof ScheduleFormValues) {
-    const hasError = !!errors[field];
+    const hasError = Boolean(errors[field]);
     return {
       id: `schedule-${field}`,
       name: field,
@@ -98,15 +102,19 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
   function handleError(error: unknown, fallback: string) {
     const message = getApiErrorMessage(error, fallback);
     const status = getApiStatus(error);
-    if (status === 409 && message.includes('overlaps'))
+    if (status === 409 && message.includes('overlaps')) {
       setErrors({ start_time: 'Jadwal bentrok dengan jadwal lain di hari yang sama' });
-    else if (status === 401) setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
-    else if (status === 403) setServerError('Hanya admin yang boleh mengelola jadwal dokter.');
-    else setServerError(message);
+    } else if (status === 401) {
+      setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
+    } else if (status === 403) {
+      setServerError('Hanya admin yang boleh mengelola jadwal dokter.');
+    } else {
+      setServerError(message);
+    }
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
     setNotice('');
 
@@ -127,8 +135,11 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
       onError: (error: unknown) => handleError(error, 'Gagal menyimpan jadwal.'),
     };
 
-    if (editingId) updateSchedule.mutate({ id: editingId, body: parsed.data }, callbacks);
-    else createSchedule.mutate({ doctor_id: doctor.id, ...parsed.data }, callbacks);
+    if (editingId) {
+      updateSchedule.mutate({ id: editingId, body: parsed.data }, callbacks);
+    } else {
+      createSchedule.mutate({ doctor_id: doctor.id, ...parsed.data }, callbacks);
+    }
   }
 
   function toggleActive(schedule: TDoctorSchedule) {
@@ -162,6 +173,104 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
     });
   }
 
+  // Daftar jadwal: loading → error → kosong → data
+  let scheduleListContent;
+  if (schedulesQuery.isPending) {
+    scheduleListContent = (
+      <p role="status" className="mt-3 text-neutral-600">
+        Memuat jadwal...
+      </p>
+    );
+  } else if (schedulesQuery.isError) {
+    scheduleListContent = (
+      <div role="alert" className="mt-3">
+        <p className="text-red-900">
+          {getApiErrorMessage(schedulesQuery.error, 'Gagal memuat jadwal.')}
+        </p>
+        <button
+          type="button"
+          onClick={() => schedulesQuery.refetch()}
+          className={`mt-3 ${secondaryBtn}`}
+        >
+          Coba lagi
+        </button>
+      </div>
+    );
+  } else if (schedules.length === 0) {
+    scheduleListContent = (
+      <p className="mt-3 rounded-xl bg-neutral-100 px-4 py-3 text-neutral-700">
+        Belum ada jadwal. Tambahkan jadwal praktik pertama di bawah.
+      </p>
+    );
+  } else {
+    scheduleListContent = (
+      <ul className="mt-3 grid gap-3">
+        {schedules.map((schedule) => (
+          <li
+            key={schedule.id}
+            className={`rounded-2xl border px-4 py-3 ${
+              editingId === schedule.id ? 'border-[#1B1B7A] bg-[#1B1B7A]/5' : 'border-neutral-200'
+            }`}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className={schedule.is_active ? '' : 'text-neutral-600'}>
+                <span className="font-semibold">{DAYS[schedule.day_of_week]}</span>{' '}
+                {formatTime(schedule.start_time)}–{formatTime(schedule.end_time)} · kuota {schedule.patient_quota}
+              </p>
+              <span
+                className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                  schedule.is_active ? 'bg-green-100 text-green-900' : 'bg-neutral-200 text-neutral-800'
+                }`}
+              >
+                {schedule.is_active ? 'Aktif' : 'Nonaktif'}
+              </span>
+            </div>
+            <div className="mt-1 flex flex-wrap gap-1">
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => {
+                  setEditingId(schedule.id);
+                  setValues(toFormValues(schedule));
+                  setErrors({});
+                  setConfirmDeleteId(null);
+                }}
+                className={`${actionLink} disabled:text-neutral-500 text-[#1B1B7A] hover:bg-neutral-100`}
+              >
+                Ubah
+              </button>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => toggleActive(schedule)}
+                className={`${actionLink} disabled:text-neutral-500 text-[#1B1B7A] hover:bg-neutral-100`}
+              >
+                {schedule.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+              </button>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => handleDelete(schedule)}
+                className={`${actionLink} disabled:text-neutral-500 text-red-700 hover:bg-red-50`}
+              >
+                {confirmDeleteId === schedule.id ? 'Yakin hapus?' : 'Hapus'}
+              </button>
+              {confirmDeleteId === schedule.id && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteId(null)}
+                  className={`${actionLink} disabled:text-neutral-500 text-neutral-700 hover:bg-neutral-100`}
+                >
+                  Batal
+                </button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <Modal
       title={`Jadwal ${doctor.full_name}`}
@@ -190,93 +299,7 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
         <h3 id="schedule-list-heading" className="font-bold text-[#1B1B7A]">
           Jadwal praktik mingguan
         </h3>
-        {schedulesQuery.isPending ? (
-          <p role="status" className="mt-3 text-neutral-600">
-            Memuat jadwal...
-          </p>
-        ) : schedulesQuery.isError ? (
-          <div role="alert" className="mt-3">
-            <p className="text-red-900">
-              {getApiErrorMessage(schedulesQuery.error, 'Gagal memuat jadwal.')}
-            </p>
-            <button
-              type="button"
-              onClick={() => schedulesQuery.refetch()}
-              className={`mt-3 ${secondaryBtn}`}
-            >
-              Coba lagi
-            </button>
-          </div>
-        ) : schedules.length === 0 ? (
-          <p className="mt-3 rounded-xl bg-neutral-100 px-4 py-3 text-neutral-700">
-            Belum ada jadwal. Tambahkan jadwal praktik pertama di bawah.
-          </p>
-        ) : (
-          <ul className="mt-3 grid gap-3">
-            {schedules.map((s) => (
-              <li
-                key={s.id}
-                className={`rounded-2xl border px-4 py-3 ${
-                  editingId === s.id ? 'border-[#1B1B7A] bg-[#1B1B7A]/5' : 'border-neutral-200'
-                }`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className={s.is_active ? '' : 'text-neutral-600'}>
-                    <span className="font-semibold">{DAYS[s.day_of_week]}</span>{' '}
-                    {formatTime(s.start_time)}–{formatTime(s.end_time)} · kuota {s.patient_quota}
-                  </p>
-                  <span
-                    className={`rounded-full px-3 py-1 text-sm font-semibold ${
-                      s.is_active ? 'bg-green-100 text-green-900' : 'bg-neutral-200 text-neutral-800'
-                    }`}
-                  >
-                    {s.is_active ? 'Aktif' : 'Nonaktif'}
-                  </span>
-                </div>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => {
-                      setEditingId(s.id);
-                      setValues(toFormValues(s));
-                      setErrors({});
-                      setConfirmDeleteId(null);
-                    }}
-                    className={`${actionLink} disabled:text-neutral-500 text-[#1B1B7A] hover:bg-neutral-100`}
-                  >
-                    Ubah
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => toggleActive(s)}
-                    className={`${actionLink} disabled:text-neutral-500 text-[#1B1B7A] hover:bg-neutral-100`}
-                  >
-                    {s.is_active ? 'Nonaktifkan' : 'Aktifkan'}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => handleDelete(s)}
-                    className={`${actionLink} disabled:text-neutral-500 text-red-700 hover:bg-red-50`}
-                  >
-                    {confirmDeleteId === s.id ? 'Yakin hapus?' : 'Hapus'}
-                  </button>
-                  {confirmDeleteId === s.id && (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmDeleteId(null)}
-                      className={`${actionLink} disabled:text-neutral-500 text-neutral-700 hover:bg-neutral-100`}
-                    >
-                      Batal
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+        {scheduleListContent}
       </section>
 
       {/* FORM TAMBAH / UBAH */}
@@ -294,11 +317,11 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
           <select
             {...fieldProps('day_of_week')}
             value={values.day_of_week}
-            onChange={(e) => setField('day_of_week', e.target.value)}
+            onChange={(event) => setField('day_of_week', event.target.value)}
           >
-            {DAY_ORDER.map((d) => (
-              <option key={d} value={String(d)}>
-                {DAYS[d]}
+            {DAY_ORDER.map((day) => (
+              <option key={day} value={String(day)}>
+                {DAYS[day]}
               </option>
             ))}
           </select>
@@ -315,7 +338,7 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
               type="time"
               step={300}
               value={values.start_time}
-              onChange={(e) => setField('start_time', e.target.value)}
+              onChange={(event) => setField('start_time', event.target.value)}
             />
             {renderError('start_time')}
           </div>
@@ -328,7 +351,7 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
               type="time"
               step={300}
               value={values.end_time}
-              onChange={(e) => setField('end_time', e.target.value)}
+              onChange={(event) => setField('end_time', event.target.value)}
             />
             {renderError('end_time')}
           </div>
@@ -343,7 +366,7 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
             type="text"
             inputMode="numeric"
             value={values.patient_quota}
-            onChange={(e) => setField('patient_quota', e.target.value)}
+            onChange={(event) => setField('patient_quota', event.target.value)}
           />
           {renderError('patient_quota')}
         </div>

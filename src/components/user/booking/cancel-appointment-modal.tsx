@@ -23,7 +23,9 @@ export default function CancelAppointmentModal({ appointment, onClose, onStale }
       if (getApiStatus(error) === 409) {
         setServerError('Reservasi ini sudah tidak bisa dibatalkan.');
         onStale();
-      } else setServerError(getApiErrorMessage(error, 'Gagal membatalkan reservasi.'));
+      } else {
+        setServerError(getApiErrorMessage(error, 'Gagal membatalkan reservasi.'));
+      }
     },
   });
 

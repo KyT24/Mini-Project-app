@@ -32,10 +32,15 @@ export function PaymentProofForm({ appointmentId, onExpired, cancelButton }: Pro
   const upload = useUploadPaymentProof({
     onError: (err) => {
       const status = getApiStatus(err);
-      if (status === 410) onExpired();
-      else if (status === 413) setFileError('Ukuran file maksimal 2 MB.');
-      else if (status === 401) setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
-      else setServerError(getApiErrorMessage(err, 'Gagal mengunggah bukti pembayaran.'));
+      if (status === 410) {
+        onExpired();
+      } else if (status === 413) {
+        setFileError('Ukuran file maksimal 2 MB.');
+      } else if (status === 401) {
+        setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
+      } else {
+        setServerError(getApiErrorMessage(err, 'Gagal mengunggah bukti pembayaran.'));
+      }
     },
   });
 
@@ -44,9 +49,9 @@ export function PaymentProofForm({ appointmentId, onExpired, cancelButton }: Pro
     setPreview(selected ? URL.createObjectURL(selected) : '');
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     setServerError('');
-    const selected = e.target.files?.[0] ?? null;
+    const selected = event.target.files?.[0] ?? null;
     if (selected && !ALLOWED_TYPES.includes(selected.type)) {
       selectFile(null);
       setFileError('File harus berupa gambar JPG, PNG, atau WEBP.');
@@ -61,8 +66,8 @@ export function PaymentProofForm({ appointmentId, onExpired, cancelButton }: Pro
     selectFile(selected);
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
     if (!file) {
       setFileError('Pilih foto bukti pembayaran terlebih dahulu.');
@@ -92,7 +97,7 @@ export function PaymentProofForm({ appointmentId, onExpired, cancelButton }: Pro
         id="payment-proof"
         type="file"
         accept={ALLOWED_TYPES.join(',')}
-        aria-invalid={!!fileError}
+        aria-invalid={Boolean(fileError)}
         aria-describedby={`payment-proof-hint${fileError ? ' payment-proof-error' : ''}`}
         onChange={handleFileChange}
         disabled={upload.isPending}

@@ -20,16 +20,25 @@ export function useDoctorFilters() {
 
   const q = params.get('q') ?? '';
   const specialist = params.get('specialist') ?? '';
-  const fee = FEE_RANGES.find((f) => f.value === params.get('fee'));
+  const fee = FEE_RANGES.find((range) => range.value === params.get('fee'));
   const dayOfWeek = parseDayOfWeek(params.get('day'));
   const page = Math.max(Number(params.get('page')) || 1, 1);
   const hasFilter = Boolean(q || specialist || fee || dayOfWeek !== undefined);
 
   function updateUrl(next: Partial<Record<FilterKey, string>>, resetPage = true) {
-    const sp = new URLSearchParams(params.toString());
-    Object.entries(next).forEach(([key, value]) => (value ? sp.set(key, value) : sp.delete(key)));
-    if (resetPage) sp.delete('page');
-    const query = sp.toString();
+    const searchParams = new URLSearchParams(params.toString());
+
+    // Nilai terisi → simpan di URL, nilai kosong → hapus dari URL
+    for (const [key, value] of Object.entries(next)) {
+      if (value) {
+        searchParams.set(key, value);
+      } else {
+        searchParams.delete(key);
+      }
+    }
+    if (resetPage) searchParams.delete('page');
+
+    const query = searchParams.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
 

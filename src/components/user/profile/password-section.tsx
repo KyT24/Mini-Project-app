@@ -23,15 +23,21 @@ export function PasswordSection() {
   const [isSaving, setIsSaving] = useState(false);
 
   function validate(): PasswordErrors {
-    const e: PasswordErrors = {};
-    if (!currentPassword) e.current = 'Password saat ini wajib diisi';
-    if (!newPassword) e.next = 'Password baru wajib diisi';
-    else if (newPassword.length < 8) e.next = 'Password minimal 8 karakter';
-    else if (newPassword === currentPassword)
-      e.next = 'Password baru harus berbeda dari password saat ini';
-    if (!confirmPassword) e.confirm = 'Konfirmasi password wajib diisi';
-    else if (confirmPassword !== newPassword) e.confirm = 'Password tidak sama';
-    return e;
+    const newErrors: PasswordErrors = {};
+    if (!currentPassword) newErrors.current = 'Password saat ini wajib diisi';
+    if (!newPassword) {
+      newErrors.next = 'Password baru wajib diisi';
+    } else if (newPassword.length < 8) {
+      newErrors.next = 'Password minimal 8 karakter';
+    } else if (newPassword === currentPassword) {
+      newErrors.next = 'Password baru harus berbeda dari password saat ini';
+    }
+    if (!confirmPassword) {
+      newErrors.confirm = 'Konfirmasi password wajib diisi';
+    } else if (confirmPassword !== newPassword) {
+      newErrors.confirm = 'Password tidak sama';
+    }
+    return newErrors;
   }
 
   function resetForm() {
@@ -41,8 +47,8 @@ export function PasswordSection() {
     setIsOpen(false);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
     setStatus('');
 

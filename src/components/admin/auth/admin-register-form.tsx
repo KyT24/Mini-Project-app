@@ -45,13 +45,17 @@ export default function AdminRegisterForm() {
     onError: (error) => {
       const message = getApiErrorMessage(error, 'Gagal mendaftarkan admin.');
       const status = getApiStatus(error);
-      if (status === 409 && message.includes('email'))
+      if (status === 409 && message.includes('email')) {
         setErrors({ email: 'Email sudah dipakai akun lain' });
-      else if (status === 409 && message.includes('phone'))
+      } else if (status === 409 && message.includes('phone')) {
         setErrors({ phone_number: 'Nomor WhatsApp sudah dipakai akun lain' });
-      else if (status === 401) setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
-      else if (status === 403) setServerError('Hanya admin yang boleh mendaftarkan admin baru.');
-      else setServerError(message);
+      } else if (status === 401) {
+        setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
+      } else if (status === 403) {
+        setServerError('Hanya admin yang boleh mendaftarkan admin baru.');
+      } else {
+        setServerError(message);
+      }
     },
   });
 
@@ -68,8 +72,8 @@ export default function AdminRegisterForm() {
     }
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
     setNotice('');
 
@@ -106,34 +110,34 @@ export default function AdminRegisterForm() {
       )}
 
       <div className="grid gap-5 sm:grid-cols-2">
-        {FIELDS.map((f) => {
-          const id = `admin-${f.name}`;
-          const hasError = !!errors[f.name];
-          const isPassword = f.type === 'password';
+        {FIELDS.map((field) => {
+          const id = `admin-${field.name}`;
+          const hasError = Boolean(errors[field.name]);
+          const isPassword = field.type === 'password';
           return (
             <div
-              key={f.name}
-              className={f.name === 'full_name' || f.name === 'email' ? 'sm:col-span-2' : ''}
+              key={field.name}
+              className={field.name === 'full_name' || field.name === 'email' ? 'sm:col-span-2' : ''}
             >
               <label htmlFor={id} className="font-semibold">
-                {f.label}
+                {field.label}
               </label>
               <input
                 id={id}
-                name={f.name}
-                type={isPassword && showPassword ? 'text' : f.type}
-                inputMode={f.inputMode}
-                autoComplete={f.autoComplete}
-                placeholder={f.placeholder}
-                value={values[f.name]}
-                onChange={(e) => setField(f.name, e.target.value)}
+                name={field.name}
+                type={isPassword && showPassword ? 'text' : field.type}
+                inputMode={field.inputMode}
+                autoComplete={field.autoComplete}
+                placeholder={field.placeholder}
+                value={values[field.name]}
+                onChange={(event) => setField(field.name, event.target.value)}
                 aria-invalid={hasError}
                 aria-describedby={hasError ? `${id}-error` : undefined}
                 className={`mt-2 ${inputBase} ${hasError ? 'border-red-600' : 'border-neutral-300'}`}
               />
               {hasError && (
                 <p id={`${id}-error`} role="alert" className={errorText}>
-                  {errors[f.name]}
+                  {errors[field.name]}
                 </p>
               )}
             </div>
@@ -145,7 +149,7 @@ export default function AdminRegisterForm() {
         <input
           type="checkbox"
           checked={showPassword}
-          onChange={(e) => setShowPassword(e.target.checked)}
+          onChange={(event) => setShowPassword(event.target.checked)}
           className="h-5 w-5 rounded border-neutral-300 accent-[#1B1B7A]"
         />
         <span>Tampilkan password</span>

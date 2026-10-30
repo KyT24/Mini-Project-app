@@ -42,7 +42,7 @@ export function ProfileSection({ profile }: Props) {
   });
 
   function setField<K extends keyof Profile>(key: K, value: Profile[K]) {
-    setDraft((d) => ({ ...d, [key]: value }));
+    setDraft((previousDraft) => ({ ...previousDraft, [key]: value }));
   }
 
   function startEdit() {
@@ -59,8 +59,8 @@ export function ProfileSection({ profile }: Props) {
     setIsEditing(false);
   }
 
-  function handleSave(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSave(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
     setStatus('');
 
@@ -149,8 +149,8 @@ export function ProfileSection({ profile }: Props) {
                   type="text"
                   autoComplete="name"
                   value={draft.name}
-                  onChange={(e) => setField('name', e.target.value)}
-                  aria-invalid={!!errors.name}
+                  onChange={(event) => setField('name', event.target.value)}
+                  aria-invalid={Boolean(errors.name)}
                   aria-describedby={describedBy('name')}
                   className={inputClass(errors.name)}
                 />
@@ -164,8 +164,8 @@ export function ProfileSection({ profile }: Props) {
                 type="email"
                 autoComplete="email"
                 value={draft.email}
-                onChange={(e) => setField('email', e.target.value)}
-                aria-invalid={!!errors.email}
+                onChange={(event) => setField('email', event.target.value)}
+                aria-invalid={Boolean(errors.email)}
                 aria-describedby={describedBy('email')}
                 className={inputClass(errors.email)}
               />
@@ -180,8 +180,8 @@ export function ProfileSection({ profile }: Props) {
                 autoComplete="tel"
                 placeholder="081234567890"
                 value={draft.phone}
-                onChange={(e) => setField('phone', e.target.value)}
-                aria-invalid={!!errors.phone}
+                onChange={(event) => setField('phone', event.target.value)}
+                aria-invalid={Boolean(errors.phone)}
                 aria-describedby={describedBy('phone')}
                 className={inputClass(errors.phone)}
               />
@@ -194,8 +194,8 @@ export function ProfileSection({ profile }: Props) {
                 type="date"
                 autoComplete="bday"
                 value={draft.birthDate}
-                onChange={(e) => setField('birthDate', e.target.value)}
-                aria-invalid={!!errors.birthDate}
+                onChange={(event) => setField('birthDate', event.target.value)}
+                aria-invalid={Boolean(errors.birthDate)}
                 aria-describedby={describedBy('birthDate')}
                 className={inputClass(errors.birthDate)}
               />
@@ -206,7 +206,7 @@ export function ProfileSection({ profile }: Props) {
                 id="gender"
                 name="gender"
                 value={draft.gender}
-                onChange={(e) => setField('gender', e.target.value as Profile['gender'])}
+                onChange={(event) => setField('gender', event.target.value as Profile['gender'])}
                 className={`${inputBase} border-neutral-300`}
               >
                 <option value="">Pilih jenis kelamin</option>
@@ -227,7 +227,7 @@ export function ProfileSection({ profile }: Props) {
                   autoComplete="street-address"
                   placeholder="Alamat lengkap"
                   value={draft.address}
-                  onChange={(e) => setField('address', e.target.value)}
+                  onChange={(event) => setField('address', event.target.value)}
                   className={`${inputBase} border-neutral-300`}
                 />
               </Field>

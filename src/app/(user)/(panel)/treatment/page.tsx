@@ -19,7 +19,7 @@ function categoryId(category: string) {
 export default function TreatmentPage() {
   const grouped = categories.map((category) => ({
     category,
-    items: treatments.filter((t) => t.category === category),
+    items: treatments.filter((treatment) => treatment.category === category),
   }));
 
   return (
@@ -97,9 +97,9 @@ export default function TreatmentPage() {
               </div>
 
               <ul className="mt-6 grid gap-5 sm:grid-cols-2 md:mt-8 md:gap-6 lg:grid-cols-3">
-                {items.map((t, i) => (
-                  <li key={t.slug}>
-                    <TreatmentCard treatment={t} index={i} />
+                {items.map((treatment, index) => (
+                  <li key={treatment.slug}>
+                    <TreatmentCard treatment={treatment} index={index} />
                   </li>
                 ))}
               </ul>

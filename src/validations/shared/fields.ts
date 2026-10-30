@@ -28,7 +28,7 @@ export const phoneField = z
   .string()
   .trim()
   .min(1, 'Nomor WhatsApp wajib diisi')
-  .refine((v) => PHONE_REGEX.test(v.replace(/[\s-]/g, '')), {
+  .refine((value) => PHONE_REGEX.test(value.replace(/[\s-]/g, '')), {
     message: 'Nomor tidak valid. Contoh: 081234567890',
   });
 
@@ -37,7 +37,7 @@ export const passwordField = z
   .min(1, 'Password wajib diisi')
   .min(8, 'Password minimal 8 karakter')
   .max(72, 'Password maksimal 72 karakter')
-  .refine((v) => /[A-Za-z]/.test(v) && /\d/.test(v), {
+  .refine((value) => /[A-Za-z]/.test(value) && /\d/.test(value), {
     message: 'Password harus mengandung huruf dan angka',
   });
 

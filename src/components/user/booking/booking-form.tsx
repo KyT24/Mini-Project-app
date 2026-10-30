@@ -31,7 +31,7 @@ export default function BookingForm({ treatment }: Props) {
 
   const doctorsQuery = useGetDoctors({ is_active: true, limit: 100, sort: 'experience_desc' });
   const doctors = doctorsQuery.data?.data ?? [];
-  const selectedDoctor = doctors.find((d) => d.id === doctorId);
+  const selectedDoctor = doctors.find((doctor) => doctor.id === doctorId);
 
   const availability = useGetAvailability(doctorId || undefined, date);
   const slots = availability.data?.data.slots ?? [];
@@ -55,15 +55,18 @@ export default function BookingForm({ treatment }: Props) {
         setErrors({ slot: 'Jadwal ini sudah tidak tersedia. Silakan pilih jadwal lain.' });
         setStartTime('');
         availability.refetch();
-      } else if (status === 401) setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
-      else if (status === 404 && message.includes('treatment'))
+      } else if (status === 401) {
+        setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
+      } else if (status === 404 && message.includes('treatment')) {
         setServerError('Treatment ini belum bisa dipesan online. Silakan hubungi klinik.');
-      else setServerError(message);
+      } else {
+        setServerError(message);
+      }
     },
   });
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
 
     const nextErrors: Errors = {};
@@ -82,6 +85,99 @@ export default function BookingForm({ treatment }: Props) {
   }
 
   const describedBy = (field: keyof Errors) => (errors[field] ? `booking-${field}-error` : undefined);
+
+  // Pilihan jadwal: belum pilih dokter → loading → error → kosong → daftar jadwal
+  let slotContent;
+  if (!doctorId) {
+    slotContent = (
+      <p className="mt-3 rounded-xl bg-neutral-100 px-4 py-3 text-neutral-700">
+        Pilih dokter dulu untuk melihat jadwal dan sisa kuota.
+      </p>
+    );
+  } else if (availability.isPending) {
+    slotContent = (
+      <p role="status" className="mt-3 text-neutral-600">
+        Memuat jadwal...
+      </p>
+    );
+  } else if (availability.isError) {
+    slotContent = (
+      <div role="alert" className="mt-3">
+        <p className="text-red-900">
+          {getApiErrorMessage(availability.error, 'Gagal memuat jadwal.')}
+        </p>
+        <button
+          type="button"
+          onClick={() => availability.refetch()}
+          className={`mt-3 ${secondaryBtn}`}
+        >
+          Coba lagi
+        </button>
+      </div>
+    );
+  } else if (slots.length === 0) {
+    slotContent = (
+      <p className="mt-3 rounded-xl bg-neutral-100 px-4 py-3 text-neutral-700">
+        Dokter tidak praktik di tanggal ini. Silakan pilih tanggal lain.
+      </p>
+    );
+  } else {
+    slotContent = (
+      <div
+        aria-busy={availability.isFetching}
+        className="mt-3 grid gap-3 sm:grid-cols-2"
+      >
+        {slots.map((slot) => {
+          const id = `booking-slot-${slot.start_time}`;
+          const checked = startTime === slot.start_time;
+          const status = slot.available
+            ? `Sisa kuota ${slot.remaining} dari ${slot.quota}`
+            : slot.remaining === 0
+              ? 'Kuota penuh'
+              : 'Tidak tersedia';
+          return (
+            <label
+              key={slot.start_time}
+              htmlFor={id}
+              className={`flex min-h-11 items-center gap-3 rounded-2xl border px-4 py-3 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-[#1B1B7A] ${
+                !slot.available
+                  ? 'cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-600'
+                  : checked
+                    ? 'cursor-pointer border-[#1B1B7A] bg-[#1B1B7A]/5'
+                    : 'cursor-pointer border-neutral-300 hover:border-[#1B1B7A]'
+              }`}
+            >
+              <input
+                id={id}
+                type="radio"
+                name="slot"
+                value={slot.start_time}
+                checked={checked}
+                disabled={!slot.available}
+                onChange={() => {
+                  setStartTime(slot.start_time);
+                  setErrors((previousErrors) => ({ ...previousErrors, slot: undefined }));
+                }}
+                className="h-5 w-5 shrink-0 accent-[#1B1B7A]"
+              />
+              <span>
+                <span className="block font-semibold">
+                  {slot.start_time}–{slot.end_time} WIB
+                </span>
+                <span
+                  className={`block text-sm ${
+                    slot.available && slot.remaining <= 2 ? 'font-semibold text-amber-800' : ''
+                  }`}
+                >
+                  {status}
+                </span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} noValidate className={card}>
@@ -112,23 +208,23 @@ export default function BookingForm({ treatment }: Props) {
           <select
             id="booking-doctor"
             value={doctorId}
-            aria-invalid={!!errors.doctor}
+            aria-invalid={Boolean(errors.doctor)}
             aria-describedby={describedBy('doctor')}
             disabled={doctorsQuery.isPending}
-            onChange={(e) => {
-              setDoctorId(e.target.value);
+            onChange={(event) => {
+              setDoctorId(event.target.value);
               setStartTime('');
-              setErrors((p) => ({ ...p, doctor: undefined, slot: undefined }));
+              setErrors((previousErrors) => ({ ...previousErrors, doctor: undefined, slot: undefined }));
             }}
             className={`mt-2 ${inputBase} ${errors.doctor ? 'border-red-600' : 'border-neutral-300'}`}
           >
             <option value="">
               {doctorsQuery.isPending ? 'Memuat dokter...' : 'Pilih dokter'}
             </option>
-            {doctors.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.full_name}
-                {d.specialists ? ` · ${d.specialists.name}` : ''}
+            {doctors.map((doctor) => (
+              <option key={doctor.id} value={doctor.id}>
+                {doctor.full_name}
+                {doctor.specialists ? ` · ${doctor.specialists.name}` : ''}
               </option>
             ))}
           </select>
@@ -161,19 +257,19 @@ export default function BookingForm({ treatment }: Props) {
           <select
             id="booking-date"
             value={date}
-            aria-invalid={!!errors.date}
+            aria-invalid={Boolean(errors.date)}
             aria-describedby={describedBy('date')}
-            onChange={(e) => {
-              setDate(e.target.value);
+            onChange={(event) => {
+              setDate(event.target.value);
               setStartTime('');
-              setErrors((p) => ({ ...p, date: undefined, slot: undefined }));
+              setErrors((previousErrors) => ({ ...previousErrors, date: undefined, slot: undefined }));
             }}
             className={`mt-2 ${inputBase} ${errors.date ? 'border-red-600' : 'border-neutral-300'}`}
           >
-            {dates.map((d, i) => (
-              <option key={d} value={d}>
-                {formatDate(d)}
-                {i === 0 ? ' (hari ini)' : ''}
+            {dates.map((date, index) => (
+              <option key={date} value={date}>
+                {formatDate(date)}
+                {index === 0 ? ' (hari ini)' : ''}
               </option>
             ))}
           </select>
@@ -191,86 +287,7 @@ export default function BookingForm({ treatment }: Props) {
             Kuota setiap jadwal ditentukan oleh klinik.
           </p>
 
-          {!doctorId ? (
-            <p className="mt-3 rounded-xl bg-neutral-100 px-4 py-3 text-neutral-700">
-              Pilih dokter dulu untuk melihat jadwal dan sisa kuota.
-            </p>
-          ) : availability.isPending ? (
-            <p role="status" className="mt-3 text-neutral-600">
-              Memuat jadwal...
-            </p>
-          ) : availability.isError ? (
-            <div role="alert" className="mt-3">
-              <p className="text-red-900">
-                {getApiErrorMessage(availability.error, 'Gagal memuat jadwal.')}
-              </p>
-              <button
-                type="button"
-                onClick={() => availability.refetch()}
-                className={`mt-3 ${secondaryBtn}`}
-              >
-                Coba lagi
-              </button>
-            </div>
-          ) : slots.length === 0 ? (
-            <p className="mt-3 rounded-xl bg-neutral-100 px-4 py-3 text-neutral-700">
-              Dokter tidak praktik di tanggal ini. Silakan pilih tanggal lain.
-            </p>
-          ) : (
-            <div
-              aria-busy={availability.isFetching}
-              className="mt-3 grid gap-3 sm:grid-cols-2"
-            >
-              {slots.map((slot) => {
-                const id = `booking-slot-${slot.start_time}`;
-                const checked = startTime === slot.start_time;
-                const status = slot.available
-                  ? `Sisa kuota ${slot.remaining} dari ${slot.quota}`
-                  : slot.remaining === 0
-                    ? 'Kuota penuh'
-                    : 'Tidak tersedia';
-                return (
-                  <label
-                    key={slot.start_time}
-                    htmlFor={id}
-                    className={`flex min-h-11 items-center gap-3 rounded-2xl border px-4 py-3 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-[#1B1B7A] ${
-                      !slot.available
-                        ? 'cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-600'
-                        : checked
-                          ? 'cursor-pointer border-[#1B1B7A] bg-[#1B1B7A]/5'
-                          : 'cursor-pointer border-neutral-300 hover:border-[#1B1B7A]'
-                    }`}
-                  >
-                    <input
-                      id={id}
-                      type="radio"
-                      name="slot"
-                      value={slot.start_time}
-                      checked={checked}
-                      disabled={!slot.available}
-                      onChange={() => {
-                        setStartTime(slot.start_time);
-                        setErrors((p) => ({ ...p, slot: undefined }));
-                      }}
-                      className="h-5 w-5 shrink-0 accent-[#1B1B7A]"
-                    />
-                    <span>
-                      <span className="block font-semibold">
-                        {slot.start_time}–{slot.end_time} WIB
-                      </span>
-                      <span
-                        className={`block text-sm ${
-                          slot.available && slot.remaining <= 2 ? 'font-semibold text-amber-800' : ''
-                        }`}
-                      >
-                        {status}
-                      </span>
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
+          {slotContent}
           {errors.slot && (
             <p id="booking-slot-error" role="alert" className={errorText}>
               {errors.slot}

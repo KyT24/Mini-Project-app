@@ -7,8 +7,8 @@ export function useNow(active: boolean) {
 
   useEffect(() => {
     if (!active) return;
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
   }, [active]);
 
   return now;

@@ -37,15 +37,15 @@ export function PasswordInput({
         autoComplete={autoComplete}
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}
-        aria-invalid={!!error}
+        aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : hintId}
         className={`${inputClass(error)} pr-28`}
       />
       <button
         type="button"
-        onClick={() => setShow((v) => !v)}
+        onClick={() => setShow((previous) => !previous)}
         aria-pressed={show}
         className={toggleBtn}
       >

@@ -60,7 +60,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </button>
         <button
           type="button"
-          onClick={() => setCollapsed((v) => !v)}
+          onClick={() => setCollapsed((previous) => !previous)}
           aria-label={collapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
           aria-expanded={!collapsed}
           aria-controls="admin-sidebar"

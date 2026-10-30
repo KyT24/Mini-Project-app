@@ -95,8 +95,11 @@ export default function DeleteSpecialistModal({ specialist, onClose, onSuccess }
                     onClose();
                   },
                   onError: (error) => {
-                    if (getApiStatus(error) === 409) setInUse(true);
-                    else setServerError(getApiErrorMessage(error, 'Gagal menghapus spesialis.'));
+                    if (getApiStatus(error) === 409) {
+                      setInUse(true);
+                    } else {
+                      setServerError(getApiErrorMessage(error, 'Gagal menghapus spesialis.'));
+                    }
                   },
                 });
               }}

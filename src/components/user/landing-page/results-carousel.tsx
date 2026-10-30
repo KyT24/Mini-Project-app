@@ -143,11 +143,11 @@ export function ResultsCarousel() {
           aria-label="Daftar treatment unggulan"
           className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth [-ms-overflow-style:none] scrollbar-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A] [&::-webkit-scrollbar]:hidden"
         >
-          {featuredTreatments.map((t, i) => (
+          {featuredTreatments.map((treatment, index) => (
             <FeaturedSlide
-              key={t.slug}
-              treatment={t}
-              label={`${i + 1} dari ${featuredTreatments.length}`}
+              key={treatment.slug}
+              treatment={treatment}
+              label={`${index + 1} dari ${featuredTreatments.length}`}
             />
           ))}
         </ul>
@@ -180,18 +180,18 @@ export function ResultsCarousel() {
         role="group"
         aria-label="Pilih halaman"
       >
-        {Array.from({ length: pages }).map((_, i) => (
+        {Array.from({ length: pages }).map((_, index) => (
           <button
-            key={i}
+            key={index}
             type="button"
-            onClick={() => goTo(i)}
-            aria-label={`Halaman ${i + 1}`}
-            aria-current={i === page ? 'true' : undefined}
+            onClick={() => goTo(index)}
+            aria-label={`Halaman ${index + 1}`}
+            aria-current={index === page ? 'true' : undefined}
             className="grid h-6 w-6 place-items-center focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[#1B1B7A]"
           >
             <span
               className={`block h-2.5 w-2.5 rounded-full transition-colors ${
-                i === page ? 'bg-neutral-900' : 'bg-neutral-300'
+                index === page ? 'bg-neutral-900' : 'bg-neutral-300'
               }`}
             />
           </button>

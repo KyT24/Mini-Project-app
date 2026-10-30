@@ -12,8 +12,8 @@ export function ReminderSection() {
   const [status, setStatus] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setStatus('');
     setIsSaving(true);
     try {
@@ -38,7 +38,7 @@ export function ReminderSection() {
             <input
               type="checkbox"
               checked={remindWhatsapp}
-              onChange={(e) => setRemindWhatsapp(e.target.checked)}
+              onChange={(event) => setRemindWhatsapp(event.target.checked)}
               className={checkboxClass}
             />
             <span>Kirim pengingat lewat WhatsApp</span>
@@ -47,7 +47,7 @@ export function ReminderSection() {
             <input
               type="checkbox"
               checked={remindEmail}
-              onChange={(e) => setRemindEmail(e.target.checked)}
+              onChange={(event) => setRemindEmail(event.target.checked)}
               className={checkboxClass}
             />
             <span>Kirim pengingat lewat email</span>

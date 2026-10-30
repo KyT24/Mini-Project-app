@@ -12,17 +12,22 @@ import { NAVY } from './constants';
 export function TreatmentTabs() {
   const [active, setActive] = useState<Category>('Acne & Scar');
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const visible = treatments.filter((t) => t.category === active);
+  const visible = treatments.filter((treatment) => treatment.category === active);
 
-  function onKeyDown(e: React.KeyboardEvent, index: number) {
+  function onKeyDown(event: React.KeyboardEvent, index: number) {
     let next = index;
-    if (e.key === 'ArrowRight') next = (index + 1) % categories.length;
-    else if (e.key === 'ArrowLeft')
+    if (event.key === 'ArrowRight') {
+      next = (index + 1) % categories.length;
+    } else if (event.key === 'ArrowLeft') {
       next = (index - 1 + categories.length) % categories.length;
-    else if (e.key === 'Home') next = 0;
-    else if (e.key === 'End') next = categories.length - 1;
-    else return;
-    e.preventDefault();
+    } else if (event.key === 'Home') {
+      next = 0;
+    } else if (event.key === 'End') {
+      next = categories.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
     setActive(categories[next]);
     tabRefs.current[next]?.focus();
     tabRefs.current[next]?.scrollIntoView({
@@ -44,22 +49,22 @@ export function TreatmentTabs() {
         aria-label="Kategori perawatan"
         className="-mx-5 mt-6 flex scroll-px-5 gap-2 overflow-x-auto px-5 pb-2 [-ms-overflow-style:none] scrollbar-none md:mx-0 md:mt-8 md:flex-wrap md:justify-center md:gap-3 md:overflow-visible md:px-0 [&::-webkit-scrollbar]:hidden"
       >
-        {categories.map((c, i) => {
-          const selected = c === active;
-          const Icon = categoryIcons[c];
+        {categories.map((category, index) => {
+          const selected = category === active;
+          const Icon = categoryIcons[category];
           return (
             <button
-              key={c}
+              key={category}
               ref={(el) => {
-                tabRefs.current[i] = el;
+                tabRefs.current[index] = el;
               }}
               role="tab"
-              id={`tab-${i}`}
+              id={`tab-${index}`}
               aria-selected={selected}
               aria-controls="panel-treatments"
               tabIndex={selected ? 0 : -1}
-              onClick={() => setActive(c)}
-              onKeyDown={(e) => onKeyDown(e, i)}
+              onClick={() => setActive(category)}
+              onKeyDown={(event) => onKeyDown(event, index)}
               className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] sm:text-base md:px-6 md:py-3 md:text-lg ${
                 selected
                   ? 'border-[#1B1B7A] bg-[#1B1B7A] text-white shadow-md'
@@ -67,7 +72,7 @@ export function TreatmentTabs() {
               }`}
             >
               <Icon size={18} strokeWidth={2} aria-hidden="true" />
-              {c}
+              {category}
             </button>
           );
         })}
@@ -79,8 +84,8 @@ export function TreatmentTabs() {
         tabIndex={0}
         className="mt-8 grid gap-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A] sm:grid-cols-2 md:mt-10 md:gap-6 lg:grid-cols-4"
       >
-        {visible.map((t, i) => (
-          <TreatmentCard key={t.slug} treatment={t} index={i} />
+        {visible.map((treatment, index) => (
+          <TreatmentCard key={treatment.slug} treatment={treatment} index={index} />
         ))}
       </div>
       <div className="mt-10 flex justify-center">

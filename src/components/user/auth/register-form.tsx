@@ -53,12 +53,12 @@ export function RegisterForm() {
     field: keyof RegisterValues,
     validate: (value: string) => string | undefined,
     current: string,
-    set: (v: string) => void,
+    set: (value: string) => void,
   ) {
     return {
-      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-        set(e.target.value);
-        if (errors[field]) setFieldError(field, validate(e.target.value));
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        set(event.target.value);
+        if (errors[field]) setFieldError(field, validate(event.target.value));
       },
       onBlur: () => setFieldError(field, validate(current)),
     };
@@ -68,18 +68,20 @@ export function RegisterForm() {
     setPassword(value);
     if (errors.password) setFieldError('password', validateNewPassword(value));
     // Sinkronkan konfirmasi bila sudah pernah diisi
-    if (confirmPassword)
+    if (confirmPassword) {
       setFieldError('confirmPassword', validateConfirmPassword(confirmPassword, value));
+    }
   }
 
   function changeConfirmPassword(value: string) {
     setConfirmPassword(value);
-    if (errors.confirmPassword)
+    if (errors.confirmPassword) {
       setFieldError('confirmPassword', validateConfirmPassword(value, password));
+    }
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
 
     const parsed = registerSchema.safeParse({ name, email, phone, password, confirmPassword, agree });
@@ -126,7 +128,7 @@ export function RegisterForm() {
             placeholder="Nama sesuai identitas"
             value={name}
             {...fieldHandlers('name', validateName, name, setName)}
-            aria-invalid={!!errors.name}
+            aria-invalid={Boolean(errors.name)}
             aria-describedby={errors.name ? 'name-error' : undefined}
             className={inputClass(errors.name)}
           />
@@ -141,7 +143,7 @@ export function RegisterForm() {
             placeholder="nama@email.com"
             value={email}
             {...fieldHandlers('email', validateEmail, email, setEmail)}
-            aria-invalid={!!errors.email}
+            aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? 'email-error' : undefined}
             className={inputClass(errors.email)}
           />
@@ -157,7 +159,7 @@ export function RegisterForm() {
             placeholder="08xxxxxxxx"
             value={phone}
             {...fieldHandlers('phone', validatePhone, phone, setPhone)}
-            aria-invalid={!!errors.phone}
+            aria-invalid={Boolean(errors.phone)}
             aria-describedby={errors.phone ? 'phone-error' : undefined}
             className={inputClass(errors.phone)}
           />
@@ -202,11 +204,11 @@ export function RegisterForm() {
             <input
               type="checkbox"
               checked={agree}
-              onChange={(e) => {
-                setAgree(e.target.checked);
-                setFieldError('agree', validateAgree(e.target.checked));
+              onChange={(event) => {
+                setAgree(event.target.checked);
+                setFieldError('agree', validateAgree(event.target.checked));
               }}
-              aria-invalid={!!errors.agree}
+              aria-invalid={Boolean(errors.agree)}
               aria-describedby={errors.agree ? 'agree-error' : undefined}
               className="mt-0.5 h-5 w-5 shrink-0 rounded border-neutral-300 accent-[#1B1B7A]"
             />

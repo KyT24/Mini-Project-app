@@ -45,7 +45,99 @@ export default function SpecialistManagement() {
   function handleSuccess(message: string) {
     setNotice(message);
     // Kembali ke halaman sebelumnya bila baris terakhir di halaman ini dihapus
-    if (modal?.type === 'delete' && specialists.length === 1 && page > 1) setPage((p) => p - 1);
+    if (modal?.type === 'delete' && specialists.length === 1 && page > 1) setPage((previousPage) => previousPage - 1);
+  }
+
+  // Isi tabel: loading → error → kosong → data
+  let tableContent;
+  if (isPending) {
+    tableContent = (
+      <p role="status" className="p-8 text-center text-neutral-600">
+        Memuat data spesialis...
+      </p>
+    );
+  } else if (isError) {
+    tableContent = (
+      <div role="alert" className="p-8 text-center">
+        <p className="text-red-900">
+          {getApiErrorMessage(error, 'Gagal memuat data spesialis.')}
+        </p>
+        <button type="button" onClick={() => refetch()} className={`mt-4 ${secondaryBtn}`}>
+          Coba lagi
+        </button>
+      </div>
+    );
+  } else if (specialists.length === 0) {
+    tableContent = (
+      <p className="p-8 text-center text-neutral-600">
+        {debouncedSearch || status !== 'all'
+          ? 'Tidak ada spesialis yang cocok dengan filter.'
+          : 'Belum ada data spesialis. Tambahkan spesialis pertama.'}
+      </p>
+    );
+  } else {
+    tableContent = (
+      <div className="overflow-x-auto">
+        <table
+          aria-busy={isFetching}
+          className={`w-full min-w-180 text-left ${isFetching ? 'opacity-60' : ''}`}
+        >
+          <caption className="sr-only">Daftar spesialis</caption>
+          <thead className="border-b border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
+            <tr>
+              <th scope="col" className="px-5 py-3 font-semibold">Spesialis</th>
+              <th scope="col" className="px-5 py-3 font-semibold">Jumlah dokter</th>
+              <th scope="col" className="px-5 py-3 font-semibold">Status</th>
+              <th scope="col" className="px-5 py-3 text-right font-semibold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {specialists.map((specialist) => (
+              <tr key={specialist.id}>
+                <th scope="row" className="px-5 py-4 font-normal">
+                  <p className="font-semibold text-neutral-900">{specialist.name}</p>
+                  {specialist.description && (
+                    <p className="line-clamp-2 max-w-md text-sm text-neutral-600">
+                      {specialist.description}
+                    </p>
+                  )}
+                </th>
+                <td className="px-5 py-4">{specialist._count.doctors} dokter</td>
+                <td className="px-5 py-4">
+                  <span
+                    className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
+                      specialist.is_active
+                        ? 'bg-green-100 text-green-900'
+                        : 'bg-neutral-200 text-neutral-800'
+                    }`}
+                  >
+                    {specialist.is_active ? 'Aktif' : 'Nonaktif'}
+                  </span>
+                </td>
+                <td className="px-5 py-4">
+                  <div className="flex justify-end gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setModal({ type: 'edit', specialist })}
+                      className={`${actionLink} text-[#1B1B7A] hover:bg-neutral-100`}
+                    >
+                      Ubah<span className="sr-only"> {specialist.name}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModal({ type: 'delete', specialist })}
+                      className={`${actionLink} text-red-700 hover:bg-red-50`}
+                    >
+                      Hapus<span className="sr-only"> {specialist.name}</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
   }
 
   return (
@@ -79,8 +171,8 @@ export default function SpecialistManagement() {
             type="search"
             placeholder="Nama spesialis"
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+            onChange={(event) => {
+              setSearch(event.target.value);
               setPage(1);
             }}
             className={`mt-2 ${inputBase} border-neutral-300`}
@@ -93,8 +185,8 @@ export default function SpecialistManagement() {
           <select
             id="specialist-status"
             value={status}
-            onChange={(e) => {
-              setStatus(e.target.value as StatusFilter);
+            onChange={(event) => {
+              setStatus(event.target.value as StatusFilter);
               setPage(1);
             }}
             className={`mt-2 ${inputBase} border-neutral-300`}
@@ -108,87 +200,7 @@ export default function SpecialistManagement() {
 
       {/* TABEL */}
       <div className="mt-6 overflow-hidden rounded-3xl border border-neutral-200 bg-white">
-        {isPending ? (
-          <p role="status" className="p-8 text-center text-neutral-600">
-            Memuat data spesialis...
-          </p>
-        ) : isError ? (
-          <div role="alert" className="p-8 text-center">
-            <p className="text-red-900">
-              {getApiErrorMessage(error, 'Gagal memuat data spesialis.')}
-            </p>
-            <button type="button" onClick={() => refetch()} className={`mt-4 ${secondaryBtn}`}>
-              Coba lagi
-            </button>
-          </div>
-        ) : specialists.length === 0 ? (
-          <p className="p-8 text-center text-neutral-600">
-            {debouncedSearch || status !== 'all'
-              ? 'Tidak ada spesialis yang cocok dengan filter.'
-              : 'Belum ada data spesialis. Tambahkan spesialis pertama.'}
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table
-              aria-busy={isFetching}
-              className={`w-full min-w-180 text-left ${isFetching ? 'opacity-60' : ''}`}
-            >
-              <caption className="sr-only">Daftar spesialis</caption>
-              <thead className="border-b border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
-                <tr>
-                  <th scope="col" className="px-5 py-3 font-semibold">Spesialis</th>
-                  <th scope="col" className="px-5 py-3 font-semibold">Jumlah dokter</th>
-                  <th scope="col" className="px-5 py-3 font-semibold">Status</th>
-                  <th scope="col" className="px-5 py-3 text-right font-semibold">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-200">
-                {specialists.map((specialist) => (
-                  <tr key={specialist.id}>
-                    <th scope="row" className="px-5 py-4 font-normal">
-                      <p className="font-semibold text-neutral-900">{specialist.name}</p>
-                      {specialist.description && (
-                        <p className="line-clamp-2 max-w-md text-sm text-neutral-600">
-                          {specialist.description}
-                        </p>
-                      )}
-                    </th>
-                    <td className="px-5 py-4">{specialist._count.doctors} dokter</td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
-                          specialist.is_active
-                            ? 'bg-green-100 text-green-900'
-                            : 'bg-neutral-200 text-neutral-800'
-                        }`}
-                      >
-                        {specialist.is_active ? 'Aktif' : 'Nonaktif'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setModal({ type: 'edit', specialist })}
-                          className={`${actionLink} text-[#1B1B7A] hover:bg-neutral-100`}
-                        >
-                          Ubah<span className="sr-only"> {specialist.name}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setModal({ type: 'delete', specialist })}
-                          className={`${actionLink} text-red-700 hover:bg-red-50`}
-                        >
-                          Hapus<span className="sr-only"> {specialist.name}</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {tableContent}
       </div>
 
       {/* PAGINASI */}

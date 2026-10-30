@@ -30,7 +30,7 @@ function toFormValues(specialist?: TSpecialist): SpecialistFormValues {
 }
 
 export default function SpecialistFormModal({ specialist, onClose, onSuccess }: Props) {
-  const isEdit = !!specialist;
+  const isEdit = Boolean(specialist);
   const [values, setValues] = useState<SpecialistFormValues>(() => toFormValues(specialist));
   const [errors, setErrors] = useState<FieldErrors<SpecialistFormValues>>({});
   const [serverError, setServerError] = useState('');
@@ -56,7 +56,7 @@ export default function SpecialistFormModal({ specialist, onClose, onSuccess }: 
   }
 
   function fieldProps(field: keyof SpecialistFormValues) {
-    const hasError = !!errors[field];
+    const hasError = Boolean(errors[field]);
     return {
       id: `specialist-${field}`,
       name: field,
@@ -75,8 +75,8 @@ export default function SpecialistFormModal({ specialist, onClose, onSuccess }: 
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
 
     const parsed = parseSpecialist(values);
@@ -98,10 +98,15 @@ export default function SpecialistFormModal({ specialist, onClose, onSuccess }: 
       onError: (error: unknown) => {
         const message = getApiErrorMessage(error, 'Gagal menyimpan data spesialis.');
         const status = getApiStatus(error);
-        if (status === 409) setErrors({ name: 'Nama spesialis sudah ada' });
-        else if (status === 401) setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
-        else if (status === 403) setServerError('Hanya admin yang boleh mengelola spesialis.');
-        else setServerError(message);
+        if (status === 409) {
+          setErrors({ name: 'Nama spesialis sudah ada' });
+        } else if (status === 401) {
+          setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
+        } else if (status === 403) {
+          setServerError('Hanya admin yang boleh mengelola spesialis.');
+        } else {
+          setServerError(message);
+        }
       },
     };
 
@@ -110,6 +115,14 @@ export default function SpecialistFormModal({ specialist, onClose, onSuccess }: 
     } else {
       createSpecialist.mutate(parsed.data, callbacks);
     }
+  }
+
+  // Teks tombol simpan: sedang menyimpan → mode ubah → mode tambah
+  let submitLabel = 'Tambah spesialis';
+  if (isPending) {
+    submitLabel = 'Menyimpan...';
+  } else if (isEdit) {
+    submitLabel = 'Simpan perubahan';
   }
 
   return (
@@ -139,7 +152,7 @@ export default function SpecialistFormModal({ specialist, onClose, onSuccess }: 
               type="text"
               placeholder="Dermatologi"
               value={values.name}
-              onChange={(e) => setField('name', e.target.value)}
+              onChange={(event) => setField('name', event.target.value)}
             />
             {renderError('name')}
           </div>
@@ -153,7 +166,7 @@ export default function SpecialistFormModal({ specialist, onClose, onSuccess }: 
               rows={4}
               placeholder="Penjelasan singkat bidang spesialis"
               value={values.description}
-              onChange={(e) => setField('description', e.target.value)}
+              onChange={(event) => setField('description', event.target.value)}
             />
             {renderError('description')}
           </div>
@@ -162,7 +175,7 @@ export default function SpecialistFormModal({ specialist, onClose, onSuccess }: 
             <input
               type="checkbox"
               checked={values.is_active}
-              onChange={(e) => setField('is_active', e.target.checked)}
+              onChange={(event) => setField('is_active', event.target.checked)}
               className="mt-0.5 h-5 w-5 shrink-0 rounded border-neutral-300 accent-[#1B1B7A]"
             />
             <span>
@@ -179,7 +192,7 @@ export default function SpecialistFormModal({ specialist, onClose, onSuccess }: 
             Batal
           </button>
           <button type="submit" disabled={isPending} className={primaryBtn}>
-            {isPending ? 'Menyimpan...' : isEdit ? 'Simpan perubahan' : 'Tambah spesialis'}
+            {submitLabel}
           </button>
         </div>
       </form>

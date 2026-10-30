@@ -124,8 +124,8 @@ export const treatments: Treatment[] = [
   },
 ];
 
-export const featuredTreatments = treatments.filter((t) => t.featured);
+export const featuredTreatments = treatments.filter((treatment) => treatment.featured);
 
 export function getTreatmentBySlug(slug: string) {
-  return treatments.find((t) => t.slug === slug);
+  return treatments.find((treatment) => treatment.slug === slug);
 }

@@ -21,7 +21,7 @@ import type {
 // GET /appointments/availability — kuota tiap jadwal dokter di satu tanggal
 export const useGetAvailability = (doctorId?: string, date?: string) => {
   return useQuery<TApiSuccessResponse<TAvailability>>({
-    enabled: !!doctorId && !!date,
+    enabled: Boolean(doctorId) && Boolean(date),
     queryKey: ['get-availability', doctorId, date],
     // Kuota berubah cepat karena pasien lain ikut memesan
     staleTime: 0,
@@ -54,7 +54,7 @@ export const useGetMyAppointments = ({ page = 1, limit = 10 } = {}, enabled = tr
 // GET /appointments/:id
 export const useGetAppointment = (id?: string) => {
   return useQuery<TApiSuccessResponse<TAppointment>>({
-    enabled: !!id,
+    enabled: Boolean(id),
     queryKey: ['get-appointment', id],
     staleTime: 0,
     retry: false,

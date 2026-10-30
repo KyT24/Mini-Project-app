@@ -31,7 +31,7 @@ export function DoctorFilters({ filters }: Props) {
           type="search"
           placeholder="Nama dokter"
           value={filters.search}
-          onChange={(e) => filters.changeSearch(e.target.value)}
+          onChange={(event) => filters.changeSearch(event.target.value)}
           className={selectClass}
         />
       </div>
@@ -43,13 +43,13 @@ export function DoctorFilters({ filters }: Props) {
         <select
           id="doctor-specialist"
           value={filters.specialist}
-          onChange={(e) => filters.changeSpecialist(e.target.value)}
+          onChange={(event) => filters.changeSpecialist(event.target.value)}
           className={selectClass}
         >
           <option value="">{specialistsQuery.isPending ? 'Memuat...' : 'Semua spesialis'}</option>
-          {specialists.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
+          {specialists.map((specialist) => (
+            <option key={specialist.id} value={specialist.id}>
+              {specialist.name}
             </option>
           ))}
         </select>
@@ -62,13 +62,13 @@ export function DoctorFilters({ filters }: Props) {
         <select
           id="doctor-fee"
           value={filters.fee?.value ?? ''}
-          onChange={(e) => filters.changeFee(e.target.value)}
+          onChange={(event) => filters.changeFee(event.target.value)}
           className={selectClass}
         >
           <option value="">Semua biaya</option>
-          {FEE_RANGES.map((f) => (
-            <option key={f.value} value={f.value}>
-              {f.label}
+          {FEE_RANGES.map((fee) => (
+            <option key={fee.value} value={fee.value}>
+              {fee.label}
             </option>
           ))}
         </select>
@@ -81,13 +81,13 @@ export function DoctorFilters({ filters }: Props) {
         <select
           id="doctor-day"
           value={filters.dayOfWeek === undefined ? '' : String(filters.dayOfWeek)}
-          onChange={(e) => filters.changeDay(e.target.value)}
+          onChange={(event) => filters.changeDay(event.target.value)}
           className={selectClass}
         >
           <option value="">Semua hari</option>
-          {DAY_ORDER.map((d) => (
-            <option key={d} value={String(d)}>
-              {DAYS[d]}
+          {DAY_ORDER.map((day) => (
+            <option key={day} value={String(day)}>
+              {DAYS[day]}
             </option>
           ))}
         </select>

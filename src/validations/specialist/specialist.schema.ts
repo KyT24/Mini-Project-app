@@ -27,8 +27,9 @@ export function parseSpecialist(
   | { success: true; data: TSpecialistCreate }
   | { success: false; errors: FieldErrors<SpecialistFormValues> } {
   const result = specialistFormSchema.safeParse(values);
-  if (!result.success)
+  if (!result.success) {
     return { success: false, errors: toFieldErrors(result.error) };
+  }
   return {
     success: true,
     data: {

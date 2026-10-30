@@ -6,7 +6,7 @@ import { linkClass, primaryBtn } from '@/lib/styles';
 
 // Semua slug di-prerender saat build
 export function generateStaticParams() {
-  return treatments.map((t) => ({ treatmentSlug: t.slug }));
+  return treatments.map((treatment) => ({ treatmentSlug: treatment.slug }));
 }
 
 export async function generateMetadata({
@@ -29,7 +29,7 @@ export default async function TreatmentDetailPage({
 
   // Treatment lain di kategori yang sama
   const related = treatments.filter(
-    (t) => t.category === treatment.category && t.slug !== treatment.slug,
+    (item) => item.category === treatment.category && item.slug !== treatment.slug,
   );
 
   return (
@@ -90,17 +90,17 @@ export default async function TreatmentDetailPage({
               Treatment {treatment.category} lainnya
             </h2>
             <ul className="mt-5 grid gap-4 sm:grid-cols-2">
-              {related.map((t) => (
-                <li key={t.slug}>
+              {related.map((relatedTreatment) => (
+                <li key={relatedTreatment.slug}>
                   <Link
-                    href={`/treatment/${t.slug}`}
+                    href={`/treatment/${relatedTreatment.slug}`}
                     className="block h-full rounded-2xl border border-neutral-200 bg-white p-5 transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A]"
                   >
                     <span className="text-lg font-bold text-[#1B1B7A]">
-                      {t.title}
+                      {relatedTreatment.title}
                     </span>
                     <span className="mt-1 block text-neutral-600">
-                      {t.description}
+                      {relatedTreatment.description}
                     </span>
                   </Link>
                 </li>

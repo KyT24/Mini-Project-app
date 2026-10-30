@@ -42,7 +42,7 @@ function toFormValues(doctor?: TDoctor): DoctorFormValues {
 }
 
 export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
-  const isEdit = !!doctor;
+  const isEdit = Boolean(doctor);
   const [values, setValues] = useState<DoctorFormValues>(() => toFormValues(doctor));
   const [errors, setErrors] = useState<FieldErrors<DoctorFormValues>>({});
   const [serverError, setServerError] = useState('');
@@ -61,12 +61,12 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
   const specialistOptions = specialistData?.data ?? [];
   const currentSpecialist = doctor?.specialists;
   const hasCurrentOption =
-    !currentSpecialist || specialistOptions.some((s) => s.id === currentSpecialist.id);
+    !currentSpecialist || specialistOptions.some((specialist) => specialist.id === currentSpecialist.id);
 
   // Submit dikunci selama foto masih diunggah
   const isPending = createDoctor.isPending || updateDoctor.isPending || uploadPhoto.isPending;
 
-  const parse = (v: DoctorFormValues) => (isEdit ? parseDoctorUpdate(v) : parseDoctorCreate(v));
+  const parse = (values: DoctorFormValues) => (isEdit ? parseDoctorUpdate(values) : parseDoctorCreate(values));
 
   function setField<K extends keyof DoctorFormValues>(field: K, value: DoctorFormValues[K]) {
     const next = { ...values, [field]: value };
@@ -82,7 +82,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
   }
 
   function fieldProps(field: keyof DoctorFormValues) {
-    const hasError = !!errors[field];
+    const hasError = Boolean(errors[field]);
     return {
       id: `doctor-${field}`,
       name: field,
@@ -101,28 +101,32 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
     );
   }
 
-  function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = '';
+  function handlePhoto(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
     setPhotoError('');
     if (!file) return;
 
-    if (!PHOTO_TYPES.includes(file.type))
+    if (!PHOTO_TYPES.includes(file.type)) {
       return setPhotoError('Foto harus berformat JPG, PNG, atau WEBP.');
+    }
     if (file.size > PHOTO_MAX_SIZE) return setPhotoError('Ukuran foto maksimal 2 MB.');
 
     uploadPhoto.mutate(file, {
       onSuccess: ({ data }) => setField('photo', data.url),
       onError: (error) => {
         const status = getApiStatus(error);
-        if (status === 401) setPhotoError('Sesi Anda berakhir. Silakan masuk kembali.');
-        else setPhotoError(getApiErrorMessage(error, 'Gagal mengunggah foto.'));
+        if (status === 401) {
+          setPhotoError('Sesi Anda berakhir. Silakan masuk kembali.');
+        } else {
+          setPhotoError(getApiErrorMessage(error, 'Gagal mengunggah foto.'));
+        }
       },
     });
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setServerError('');
 
     const parsed = parse(values);
@@ -144,15 +148,17 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
       onError: (error: unknown) => {
         const message = getApiErrorMessage(error, 'Gagal menyimpan data dokter.');
         const status = getApiStatus(error);
-        if (status === 409 && message.includes('email'))
+        if (status === 409 && message.includes('email')) {
           setErrors({ email: 'Email sudah dipakai akun lain' });
-        else if (status === 409 && message.includes('phone'))
+        } else if (status === 409 && message.includes('phone')) {
           setErrors({ phone_number: 'Nomor WhatsApp sudah dipakai akun lain' });
-        else if (status === 401)
+        } else if (status === 401) {
           setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
-        else if (status === 403)
+        } else if (status === 403) {
           setServerError('Hanya admin yang boleh mengelola data dokter.');
-        else setServerError(message);
+        } else {
+          setServerError(message);
+        }
       },
     };
 
@@ -161,6 +167,14 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
     } else {
       createDoctor.mutate(parsed.data as TDoctorCreate, callbacks);
     }
+  }
+
+  // Teks tombol simpan: sedang menyimpan → mode ubah → mode tambah
+  let submitLabel = 'Tambah dokter';
+  if (isPending) {
+    submitLabel = 'Menyimpan...';
+  } else if (isEdit) {
+    submitLabel = 'Simpan perubahan';
   }
 
   return (
@@ -195,7 +209,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
                   autoComplete="off"
                   placeholder="dokter@klinik.com"
                   value={values.email}
-                  onChange={(e) => setField('email', e.target.value)}
+                  onChange={(event) => setField('email', event.target.value)}
                 />
                 {renderError('email')}
               </div>
@@ -211,7 +225,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
                   autoComplete="off"
                   placeholder="081234567890"
                   value={values.phone_number}
-                  onChange={(e) => setField('phone_number', e.target.value)}
+                  onChange={(event) => setField('phone_number', event.target.value)}
                 />
                 {renderError('phone_number')}
               </div>
@@ -227,12 +241,12 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
                     autoComplete="new-password"
                     placeholder="Minimal 8 karakter, huruf dan angka"
                     value={values.password}
-                    onChange={(e) => setField('password', e.target.value)}
+                    onChange={(event) => setField('password', event.target.value)}
                     className={`${fieldProps('password').className} pr-28`}
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword((v) => !v)}
+                    onClick={() => setShowPassword((previous) => !previous)}
                     aria-pressed={showPassword}
                     className="absolute bottom-0 right-0 top-2 rounded-r-xl px-4 text-sm font-semibold text-[#1B1B7A] hover:text-[#d96a6a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A]"
                   >
@@ -259,7 +273,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
               type="text"
               placeholder="dr. Nama Dokter, Sp.KK"
               value={values.full_name}
-              onChange={(e) => setField('full_name', e.target.value)}
+              onChange={(event) => setField('full_name', event.target.value)}
             />
             {renderError('full_name')}
           </div>
@@ -274,7 +288,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
                 type="text"
                 inputMode="numeric"
                 value={values.experience_years}
-                onChange={(e) => setField('experience_years', e.target.value)}
+                onChange={(event) => setField('experience_years', event.target.value)}
               />
               {renderError('experience_years')}
             </div>
@@ -289,7 +303,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
                 inputMode="decimal"
                 placeholder="150000"
                 value={values.consultation_fee}
-                onChange={(e) => setField('consultation_fee', e.target.value)}
+                onChange={(event) => setField('consultation_fee', event.target.value)}
               />
               {renderError('consultation_fee')}
             </div>
@@ -302,7 +316,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
             <select
               {...fieldProps('specialist_id')}
               value={values.specialist_id}
-              onChange={(e) => setField('specialist_id', e.target.value)}
+              onChange={(event) => setField('specialist_id', event.target.value)}
             >
               <option value="">
                 {specialistsLoading ? 'Memuat spesialis...' : 'Pilih spesialis'}
@@ -310,9 +324,9 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
               {!hasCurrentOption && currentSpecialist && (
                 <option value={currentSpecialist.id}>{currentSpecialist.name} (nonaktif)</option>
               )}
-              {specialistOptions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
+              {specialistOptions.map((specialist) => (
+                <option key={specialist.id} value={specialist.id}>
+                  {specialist.name}
                 </option>
               ))}
             </select>
@@ -346,7 +360,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
               accept={PHOTO_TYPES.join(',')}
               onChange={handlePhoto}
               disabled={isPending}
-              aria-invalid={!!(photoError || errors.photo)}
+              aria-invalid={Boolean(photoError || errors.photo)}
               aria-describedby="doctor-photo-hint"
               className="mt-2 block w-full text-sm text-neutral-700 file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-xl file:border-0 file:bg-[#1B1B7A] file:px-4 file:font-bold file:text-white hover:file:bg-[#12125c] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A]"
             />
@@ -375,7 +389,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
               rows={4}
               placeholder="Keahlian dan latar belakang dokter"
               value={values.bio}
-              onChange={(e) => setField('bio', e.target.value)}
+              onChange={(event) => setField('bio', event.target.value)}
             />
             {renderError('bio')}
           </div>
@@ -384,7 +398,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
             <input
               type="checkbox"
               checked={values.is_active}
-              onChange={(e) => setField('is_active', e.target.checked)}
+              onChange={(event) => setField('is_active', event.target.checked)}
               className="mt-0.5 h-5 w-5 shrink-0 rounded border-neutral-300 accent-[#1B1B7A]"
             />
             <span>
@@ -401,7 +415,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
             Batal
           </button>
           <button type="submit" disabled={isPending} className={primaryBtn}>
-            {isPending ? 'Menyimpan...' : isEdit ? 'Simpan perubahan' : 'Tambah dokter'}
+            {submitLabel}
           </button>
         </div>
       </form>

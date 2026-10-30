@@ -58,8 +58,132 @@ export default function DoctorManagement() {
   function handleSuccess(message: string) {
     setNotice(message);
     // Kembali ke halaman sebelumnya bila baris terakhir di halaman ini dihapus
-    if (modal?.type === 'delete' && doctors.length === 1 && page > 1)
-      setPage((p) => p - 1);
+    if (modal?.type === 'delete' && doctors.length === 1 && page > 1) {
+      setPage((previousPage) => previousPage - 1);
+    }
+  }
+
+  // Isi tabel: loading → error → kosong → data
+  let tableContent;
+  if (isPending) {
+    tableContent = (
+      <p role="status" className="p-8 text-center text-neutral-600">
+        Memuat data dokter...
+      </p>
+    );
+  } else if (isError) {
+    tableContent = (
+      <div role="alert" className="p-8 text-center">
+        <p className="text-red-900">
+          {getApiErrorMessage(error, 'Gagal memuat data dokter.')}
+        </p>
+        <button type="button" onClick={() => refetch()} className={`mt-4 ${secondaryBtn}`}>
+          Coba lagi
+        </button>
+      </div>
+    );
+  } else if (doctors.length === 0) {
+    tableContent = (
+      <p className="p-8 text-center text-neutral-600">
+        {debouncedSearch || status !== 'all'
+          ? 'Tidak ada dokter yang cocok dengan filter.'
+          : 'Belum ada data dokter. Tambahkan dokter pertama Anda.'}
+      </p>
+    );
+  } else {
+    tableContent = (
+      <div className="overflow-x-auto">
+        <table
+          aria-busy={isFetching}
+          className={`w-full min-w-220 text-left ${isFetching ? 'opacity-60' : ''}`}
+        >
+          <caption className="sr-only">Daftar dokter</caption>
+          <thead className="border-b border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
+            <tr>
+              <th scope="col" className="px-5 py-3 font-semibold">Dokter</th>
+              <th scope="col" className="px-5 py-3 font-semibold">Spesialis</th>
+              <th scope="col" className="px-5 py-3 font-semibold">Pengalaman</th>
+              <th scope="col" className="px-5 py-3 font-semibold">Biaya konsultasi</th>
+              <th scope="col" className="px-5 py-3 font-semibold">Jadwal</th>
+              <th scope="col" className="px-5 py-3 font-semibold">Status</th>
+              <th scope="col" className="px-5 py-3 text-right font-semibold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {doctors.map((doctor) => (
+              <tr key={doctor.id}>
+                <th scope="row" className="px-5 py-4 font-normal">
+                  <div className="flex items-center gap-3">
+                    {doctor.photo ? (
+                      <img
+                        src={doctor.photo}
+                        alt=""
+                        className="h-11 w-11 shrink-0 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1B1B7A] text-sm font-bold text-white"
+                      >
+                        {getInitials(doctor.full_name)}
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-semibold text-neutral-900">{doctor.full_name}</p>
+                      <p className="truncate text-sm text-neutral-600">{doctor.users?.email}</p>
+                    </div>
+                  </div>
+                </th>
+                <td className="px-5 py-4">{doctor.specialists?.name ?? '-'}</td>
+                <td className="px-5 py-4">{doctor.experience_years} tahun</td>
+                <td className="px-5 py-4">{formatRupiah(doctor.consultation_fee)}</td>
+                <td className="px-5 py-4">
+                  {formatPracticeDays(doctor.doctor_schedules ?? []) || (
+                    <span className="text-neutral-600">Belum ada</span>
+                  )}
+                </td>
+                <td className="px-5 py-4">
+                  <span
+                    className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
+                      doctor.is_active
+                        ? 'bg-green-100 text-green-900'
+                        : 'bg-neutral-200 text-neutral-800'
+                    }`}
+                  >
+                    {doctor.is_active ? 'Aktif' : 'Nonaktif'}
+                  </span>
+                </td>
+                <td className="px-5 py-4">
+                  <div className="flex justify-end gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setModal({ type: 'schedule', doctor })}
+                      className={`${actionLink} text-[#1B1B7A] hover:bg-neutral-100`}
+                    >
+                      Jadwal<span className="sr-only"> {doctor.full_name}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModal({ type: 'edit', doctor })}
+                      className={`${actionLink} text-[#1B1B7A] hover:bg-neutral-100`}
+                    >
+                      Ubah<span className="sr-only"> {doctor.full_name}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModal({ type: 'delete', doctor })}
+                      className={`${actionLink} text-red-700 hover:bg-red-50`}
+                    >
+                      Hapus<span className="sr-only"> {doctor.full_name}</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
   }
 
   return (
@@ -95,8 +219,8 @@ export default function DoctorManagement() {
             type="search"
             placeholder="Nama dokter"
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+            onChange={(event) => {
+              setSearch(event.target.value);
               setPage(1);
             }}
             className={`mt-2 ${inputBase} border-neutral-300`}
@@ -109,8 +233,8 @@ export default function DoctorManagement() {
           <select
             id="doctor-status"
             value={status}
-            onChange={(e) => {
-              setStatus(e.target.value as StatusFilter);
+            onChange={(event) => {
+              setStatus(event.target.value as StatusFilter);
               setPage(1);
             }}
             className={`mt-2 ${inputBase} border-neutral-300`}
@@ -127,15 +251,15 @@ export default function DoctorManagement() {
           <select
             id="doctor-sort"
             value={sort}
-            onChange={(e) => {
-              setSort(e.target.value as TDoctorSort);
+            onChange={(event) => {
+              setSort(event.target.value as TDoctorSort);
               setPage(1);
             }}
             className={`mt-2 ${inputBase} border-neutral-300`}
           >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
@@ -144,118 +268,7 @@ export default function DoctorManagement() {
 
       {/* TABEL */}
       <div className="mt-6 overflow-hidden rounded-3xl border border-neutral-200 bg-white">
-        {isPending ? (
-          <p role="status" className="p-8 text-center text-neutral-600">
-            Memuat data dokter...
-          </p>
-        ) : isError ? (
-          <div role="alert" className="p-8 text-center">
-            <p className="text-red-900">
-              {getApiErrorMessage(error, 'Gagal memuat data dokter.')}
-            </p>
-            <button type="button" onClick={() => refetch()} className={`mt-4 ${secondaryBtn}`}>
-              Coba lagi
-            </button>
-          </div>
-        ) : doctors.length === 0 ? (
-          <p className="p-8 text-center text-neutral-600">
-            {debouncedSearch || status !== 'all'
-              ? 'Tidak ada dokter yang cocok dengan filter.'
-              : 'Belum ada data dokter. Tambahkan dokter pertama Anda.'}
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table
-              aria-busy={isFetching}
-              className={`w-full min-w-220 text-left ${isFetching ? 'opacity-60' : ''}`}
-            >
-              <caption className="sr-only">Daftar dokter</caption>
-              <thead className="border-b border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
-                <tr>
-                  <th scope="col" className="px-5 py-3 font-semibold">Dokter</th>
-                  <th scope="col" className="px-5 py-3 font-semibold">Spesialis</th>
-                  <th scope="col" className="px-5 py-3 font-semibold">Pengalaman</th>
-                  <th scope="col" className="px-5 py-3 font-semibold">Biaya konsultasi</th>
-                  <th scope="col" className="px-5 py-3 font-semibold">Jadwal</th>
-                  <th scope="col" className="px-5 py-3 font-semibold">Status</th>
-                  <th scope="col" className="px-5 py-3 text-right font-semibold">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-200">
-                {doctors.map((doctor) => (
-                  <tr key={doctor.id}>
-                    <th scope="row" className="px-5 py-4 font-normal">
-                      <div className="flex items-center gap-3">
-                        {doctor.photo ? (
-                          <img
-                            src={doctor.photo}
-                            alt=""
-                            className="h-11 w-11 shrink-0 rounded-full object-cover"
-                          />
-                        ) : (
-                          <span
-                            aria-hidden="true"
-                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1B1B7A] text-sm font-bold text-white"
-                          >
-                            {getInitials(doctor.full_name)}
-                          </span>
-                        )}
-                        <div className="min-w-0">
-                          <p className="font-semibold text-neutral-900">{doctor.full_name}</p>
-                          <p className="truncate text-sm text-neutral-600">{doctor.users?.email}</p>
-                        </div>
-                      </div>
-                    </th>
-                    <td className="px-5 py-4">{doctor.specialists?.name ?? '-'}</td>
-                    <td className="px-5 py-4">{doctor.experience_years} tahun</td>
-                    <td className="px-5 py-4">{formatRupiah(doctor.consultation_fee)}</td>
-                    <td className="px-5 py-4">
-                      {formatPracticeDays(doctor.doctor_schedules ?? []) || (
-                        <span className="text-neutral-600">Belum ada</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
-                          doctor.is_active
-                            ? 'bg-green-100 text-green-900'
-                            : 'bg-neutral-200 text-neutral-800'
-                        }`}
-                      >
-                        {doctor.is_active ? 'Aktif' : 'Nonaktif'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setModal({ type: 'schedule', doctor })}
-                          className={`${actionLink} text-[#1B1B7A] hover:bg-neutral-100`}
-                        >
-                          Jadwal<span className="sr-only"> {doctor.full_name}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setModal({ type: 'edit', doctor })}
-                          className={`${actionLink} text-[#1B1B7A] hover:bg-neutral-100`}
-                        >
-                          Ubah<span className="sr-only"> {doctor.full_name}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setModal({ type: 'delete', doctor })}
-                          className={`${actionLink} text-red-700 hover:bg-red-50`}
-                        >
-                          Hapus<span className="sr-only"> {doctor.full_name}</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {tableContent}
       </div>
 
       {/* PAGINASI */}

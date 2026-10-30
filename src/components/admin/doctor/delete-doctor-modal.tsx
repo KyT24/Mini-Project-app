@@ -90,8 +90,11 @@ export default function DeleteDoctorModal({ doctor, onClose, onSuccess }: Props)
                     onClose();
                   },
                   onError: (error) => {
-                    if (getApiStatus(error) === 409) setHasRelations(true);
-                    else setServerError(getApiErrorMessage(error, 'Gagal menghapus dokter.'));
+                    if (getApiStatus(error) === 409) {
+                      setHasRelations(true);
+                    } else {
+                      setServerError(getApiErrorMessage(error, 'Gagal menghapus dokter.'));
+                    }
                   },
                 });
               }}

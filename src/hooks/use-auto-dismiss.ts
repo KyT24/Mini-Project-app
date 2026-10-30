@@ -6,8 +6,8 @@ export function useAutoDismiss(delay = 5000) {
 
   useEffect(() => {
     if (!message) return;
-    const t = setTimeout(() => setMessage(''), delay);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setMessage(''), delay);
+    return () => clearTimeout(timer);
   }, [message, delay]);
 
   return [message, setMessage] as const;

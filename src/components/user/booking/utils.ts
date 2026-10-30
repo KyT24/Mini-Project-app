@@ -7,9 +7,9 @@ export const BOOKING_WINDOW_DAYS = 14;
 /** Daftar tanggal "YYYY-MM-DD" yang bisa dipesan, mulai hari ini (WIB) */
 export function getBookableDates() {
   const today = new Date(Date.now() + CLINIC_OFFSET_MS);
-  return Array.from({ length: BOOKING_WINDOW_DAYS }, (_, i) => {
-    const d = new Date(today);
-    d.setUTCDate(d.getUTCDate() + i);
-    return d.toISOString().slice(0, 10);
+  return Array.from({ length: BOOKING_WINDOW_DAYS }, (_, index) => {
+    const date = new Date(today);
+    date.setUTCDate(date.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
   });
 }

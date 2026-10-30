@@ -14,9 +14,9 @@ export const scheduleFormSchema = z
       .string()
       .trim()
       .regex(/^\d+$/, 'Kuota harus berupa angka bulat')
-      .refine((v) => Number(v) >= 1 && Number(v) <= 100, 'Kuota antara 1–100 pasien'),
+      .refine((value) => Number(value) >= 1 && Number(value) <= 100, 'Kuota antara 1–100 pasien'),
   })
-  .refine((d) => d.end_time > d.start_time, {
+  .refine((data) => data.end_time > data.start_time, {
     path: ['end_time'],
     message: 'Jam selesai harus setelah jam mulai',
   });
