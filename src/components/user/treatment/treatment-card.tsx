@@ -9,6 +9,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { Category, Treatment } from '@/constants/treatments';
+import { formatRupiah } from '@/lib/format';
 
 export const categoryIcons: Record<Category, LucideIcon> = {
   'Acne & Scar': ScanFace,
@@ -63,8 +64,11 @@ export function TreatmentCard({ treatment, index }: Props) {
         {treatment.description}
       </p>
 
-      <span className="relative mt-6 flex items-center justify-between border-t border-dashed border-neutral-200 pt-5 font-semibold text-[#1B1B7A]">
-        Lihat Detail
+      <span className="relative mt-6 flex items-center justify-between border-t border-dashed border-neutral-200 pt-5 text-[#1B1B7A]">
+        <span>
+          <span className="block text-sm text-neutral-600">Harga</span>
+          <span className="text-lg font-bold">{formatRupiah(treatment.price)}</span>
+        </span>
         <span className="grid h-10 w-10 place-items-center rounded-full border border-[#1B1B7A]/20 transition-colors duration-300 group-hover:border-[#1B1B7A] group-hover:bg-[#1B1B7A] group-hover:text-white">
           <ArrowUpRight
             size={18}

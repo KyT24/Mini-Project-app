@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTreatmentBySlug, treatments } from '@/constants/treatments';
 import { categoryIcons } from '@/components/user/treatment/treatment-card';
+import { formatRupiah } from '@/lib/format';
 import { linkClass, primaryBtn } from '@/lib/styles';
 
 // Semua slug di-prerender saat build
@@ -68,6 +69,16 @@ export default async function TreatmentDetailPage({
               {treatment.description}
             </p>
 
+            <dl className="mt-6 w-fit rounded-2xl bg-[#FAF8F3] px-5 py-4">
+              <dt className="text-sm text-neutral-600">Harga treatment</dt>
+              <dd className="text-2xl font-bold text-[#1B1B7A]">
+                {formatRupiah(treatment.price)}
+              </dd>
+              <dd className="mt-1 text-sm text-neutral-600">
+                Belum termasuk biaya konsultasi dokter
+              </dd>
+            </dl>
+
             <Link
               href={`/treatment/${treatment.slug}/booking`}
               className={`mt-8 ${primaryBtn}`}
@@ -101,6 +112,9 @@ export default async function TreatmentDetailPage({
                     </span>
                     <span className="mt-1 block text-neutral-600">
                       {relatedTreatment.description}
+                    </span>
+                    <span className="mt-3 block font-semibold text-neutral-900">
+                      {formatRupiah(relatedTreatment.price)}
                     </span>
                   </Link>
                 </li>

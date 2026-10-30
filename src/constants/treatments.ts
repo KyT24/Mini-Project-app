@@ -11,6 +11,7 @@ export type Treatment = {
   description: string;
   category: Category;
   slug: string; // dipakai di URL /treatment/[treatmentSlug]
+  price: number; // Rupiah, sama dengan seed-treatments.ts di backend
   image?: string;
   featured?: boolean; // tampil di carousel treatment unggulan
 };
@@ -20,6 +21,7 @@ export type Category = (typeof categories)[number];
 export const treatments: Treatment[] = [
   {
     slug: 'acne-dermapeel',
+    price: 400000,
     title: 'Acne Dermapeel',
     description:
       'Menggunakan larutan kimia untuk mengangkat lapisan kulit terluar. Kulit baru yang muncul lebih halus dan cerah.',
@@ -27,6 +29,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'ipl-acne',
+    price: 550000,
     title: 'IPL Acne',
     description:
       'Memanfaatkan energi cahaya untuk membuat wajah lebih halus, cerah, dan membasmi jerawat.',
@@ -34,6 +37,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'acne-laser-co2',
+    price: 1800000,
     featured: true,
     title: 'Acne Laser Co2',
     description:
@@ -42,6 +46,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'acne-facial',
+    price: 250000,
     featured: true,
     title: 'Acne Facial',
     description:
@@ -50,6 +55,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'brightening-facial',
+    price: 300000,
     featured: true,
     title: 'Brightening Facial',
     description:
@@ -58,6 +64,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'glow-peeling',
+    price: 350000,
     title: 'Glow Peeling',
     description:
       'Peeling ringan untuk mengangkat sel kulit mati sehingga kulit tampak lebih cerah dan segar.',
@@ -65,6 +72,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'vitamin-c-infusion',
+    price: 450000,
     title: 'Vitamin C Infusion',
     description:
       'Pemberian nutrisi vitamin C ke kulit untuk membantu tampilan wajah lebih bercahaya.',
@@ -72,6 +80,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'anti-aging-facial',
+    price: 400000,
     title: 'Anti-Aging Facial',
     description:
       'Perawatan wajah untuk membantu menjaga kekenyalan dan tampilan kulit agar tetap awet muda.',
@@ -79,6 +88,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'skin-booster',
+    price: 1500000,
     featured: true,
     title: 'Skin Booster',
     description:
@@ -87,6 +97,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'rf-lifting',
+    price: 1200000,
     title: 'RF Lifting',
     description:
       'Menggunakan energi radiofrekuensi untuk membantu kulit tampak lebih kencang.',
@@ -94,6 +105,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'hair-treatment',
+    price: 350000,
     featured: true,
     title: 'Hair Treatment',
     description:
@@ -102,6 +114,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'laser-hair-removal',
+    price: 600000,
     title: 'Laser Hair Removal',
     description:
       'Membantu mengurangi pertumbuhan rambut yang tidak diinginkan dengan energi laser.',
@@ -109,6 +122,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'body-slimming',
+    price: 500000,
     featured: true,
     title: 'Body Slimming',
     description:
@@ -117,6 +131,7 @@ export const treatments: Treatment[] = [
   },
   {
     slug: 'body-contouring',
+    price: 1500000,
     title: 'Body Contouring',
     description:
       'Membantu menyamarkan tampilan lemak membandel pada area tertentu.',
