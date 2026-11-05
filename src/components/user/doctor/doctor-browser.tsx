@@ -2,7 +2,7 @@
 
 import { getTotalPages, Pagination } from '@/components/ui/pagination';
 import { useGetDoctors } from '@/hooks/api/use-doctors';
-import { secondaryBtn } from '@/lib/styles';
+import { linkClass, secondaryBtn } from '@/lib/styles';
 import { DoctorFilters } from './doctor-filters';
 import { DoctorResults } from './doctor-results';
 import { useDoctorFilters } from './use-doctor-filters';
@@ -27,15 +27,19 @@ export function DoctorBrowser() {
   const meta = data?.meta;
 
   return (
-    <div className="mt-8 md:mt-10">
+    <div className="mt-6 md:mt-8">
       <DoctorFilters filters={filters} />
 
-      <div className="mt-6 flex min-h-11 flex-wrap items-center justify-between gap-3">
+      <div className="mt-4 flex min-h-11 flex-wrap items-center justify-between gap-3">
         <p role="status" aria-live="polite" className="text-neutral-700">
           {meta ? `${meta.total} dokter ditemukan` : ''}
         </p>
         {filters.hasFilter && (
-          <button type="button" onClick={filters.reset} className={secondaryBtn}>
+          <button
+            type="button"
+            onClick={filters.reset}
+            className={`inline-flex min-h-11 items-center ${linkClass}`}
+          >
             Reset filter
           </button>
         )}
@@ -49,6 +53,7 @@ export function DoctorBrowser() {
         isFetching={isFetching}
         hasFilter={filters.hasFilter}
         onRetry={() => refetch()}
+        onReset={filters.reset}
       />
 
       {meta && meta.total > PAGE_SIZE && (
