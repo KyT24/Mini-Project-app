@@ -9,7 +9,6 @@ import {
   LogOut,
   type LucideIcon,
   Stethoscope,
-  Tags,
   UserPlus,
   Users,
   Wallet,
@@ -40,7 +39,6 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Master Data',
     items: [
       { href: '/admin/doctorManagement', label: 'Dokter', icon: Stethoscope },
-      { href: '/admin/specialistManagement', label: 'Spesialis', icon: Tags },
       { href: '/admin/patientManagement', label: 'Pasien', icon: Users },
     ],
   },
