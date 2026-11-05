@@ -14,10 +14,12 @@ import {
   parseDoctorUpdate,
 } from '@/validations/doctor/doctor.schema';
 import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
+import { compressImage } from '@/lib/compress-image';
 
-// Sama dengan batas upload di backend (upload.middleware.ts)
+// Format sama dengan backend (upload.middleware.ts). Ukuran boleh lebih besar dari batas
+// backend (2 MB) karena foto dikompres dulu di browser sebelum diunggah
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const PHOTO_MAX_SIZE = 2 * 1024 * 1024;
+const PHOTO_MAX_SIZE = 20 * 1024 * 1024;
 
 type Props = {
   /** Diisi saat mode ubah; kosong saat mode tambah */
@@ -49,6 +51,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
   const [showPassword, setShowPassword] = useState(false);
 
   const [photoError, setPhotoError] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const createDoctor = useCreateDoctor();
   const updateDoctor = useUpdateDoctor();
@@ -63,8 +66,9 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
   const hasCurrentOption =
     !currentSpecialist || specialistOptions.some((specialist) => specialist.id === currentSpecialist.id);
 
-  // Submit dikunci selama foto masih diunggah
-  const isPending = createDoctor.isPending || updateDoctor.isPending || uploadPhoto.isPending;
+  // Submit dikunci selama foto masih diproses
+  const isPending =
+    createDoctor.isPending || updateDoctor.isPending || uploadPhoto.isPending || isCompressing;
 
   const parse = (values: DoctorFormValues) => (isEdit ? parseDoctorUpdate(values) : parseDoctorCreate(values));
 
@@ -101,7 +105,7 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
     );
   }
 
-  function handlePhoto(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePhoto(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = '';
     setPhotoError('');
@@ -110,10 +114,21 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
     if (!PHOTO_TYPES.includes(file.type)) {
       return setPhotoError('Foto harus berformat JPG, PNG, atau WEBP.');
     }
-    if (file.size > PHOTO_MAX_SIZE) return setPhotoError('Ukuran foto maksimal 2 MB.');
+    if (file.size > PHOTO_MAX_SIZE) return setPhotoError('Ukuran foto maksimal 20 MB.');
 
-    uploadPhoto.mutate(file, {
-      onSuccess: ({ data }) => setField('photo', data.url),
+    setIsCompressing(true);
+    let compressed: File;
+    try {
+      compressed = await compressImage(file);
+    } catch {
+      return setPhotoError('Foto tidak bisa dibaca. Coba gunakan file lain.');
+    } finally {
+      setIsCompressing(false);
+    }
+
+    uploadPhoto.mutate(compressed, {
+      // Update fungsional agar isian form selama proses foto tidak tertimpa
+      onSuccess: ({ data }) => setValues((prev) => ({ ...prev, photo: data.url })),
       onError: (error) => {
         const status = getApiStatus(error);
         if (status === 401) {
@@ -365,11 +380,11 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
               className="mt-2 block w-full text-sm text-neutral-700 file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-xl file:border-0 file:bg-[#1B1B7A] file:px-4 file:font-bold file:text-white hover:file:bg-[#12125c] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A]"
             />
             <p id="doctor-photo-hint" className="mt-1.5 text-sm text-neutral-600">
-              JPG, PNG, atau WEBP, maksimal 2 MB.
+              JPG, PNG, atau WEBP, maksimal 20 MB.
             </p>
-            {uploadPhoto.isPending && (
+            {(isCompressing || uploadPhoto.isPending) && (
               <p role="status" className="mt-1.5 text-sm text-neutral-700">
-                Mengunggah foto...
+                {isCompressing ? 'Memproses foto...' : 'Mengunggah foto...'}
               </p>
             )}
             {photoError && (
