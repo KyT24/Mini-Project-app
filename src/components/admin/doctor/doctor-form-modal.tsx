@@ -17,7 +17,7 @@ import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
 import { compressImage } from '@/lib/compress-image';
 
 // Format sama dengan backend (upload.middleware.ts). Ukuran boleh lebih besar dari batas
-// backend (2 MB) karena foto dikompres dulu di browser sebelum diunggah
+// backend (20 MB) karena foto dikompres dulu di browser sebelum diunggah
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const PHOTO_MAX_SIZE = 20 * 1024 * 1024;
 

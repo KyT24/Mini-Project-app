@@ -29,7 +29,7 @@ export function DoctorFilters({ filters }: Props) {
     <search aria-label="Cari dan filter dokter">
       <ul
         aria-label="Filter spesialis"
-        className="-mx-5 flex gap-x-6 overflow-x-auto border-b border-[#1B1B7A]/15 px-5 md:mx-0 md:gap-x-8 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="-mx-5 flex gap-x-6 overflow-x-auto border-b border-[#1B1B7A]/15 px-5 md:mx-0 md:gap-x-8 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-width:none"
       >
         {tabs.map((tab) => {
           const isActive = filters.category === tab.id;
