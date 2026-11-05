@@ -1,9 +1,10 @@
 'use client';
 
-import { CircleUserRound, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useState } from 'react';
 import { useEscapeKey } from '@/hooks/use-escape-key';
 import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
+import AdminAccountMenu from './admin-account-menu';
 import Sidebar from './sidebar';
 
 const FOCUS =
@@ -14,6 +15,12 @@ const iconBtn = `flex h-11 w-11 items-center justify-center rounded-xl text-neut
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const today = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
   // Drawer mobile: tutup dengan Escape dan kunci scroll halaman
   useEscapeKey(mobileOpen, () => setMobileOpen(false));
@@ -47,14 +54,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       />
 
       {/* TOP BAR */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 md:px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-neutral-200 bg-white px-3 md:gap-4 md:px-6">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Buka menu"
           aria-expanded={mobileOpen}
           aria-controls="admin-sidebar"
-          className={`${iconBtn} lg:hidden`}
+          className={`${iconBtn} shrink-0 lg:hidden`}
         >
           <Menu aria-hidden="true" className="h-5 w-5" />
         </button>
@@ -64,7 +71,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           aria-label={collapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
           aria-expanded={!collapsed}
           aria-controls="admin-sidebar"
-          className={`${iconBtn} hidden lg:flex`}
+          className={`${iconBtn} hidden shrink-0 lg:flex`}
         >
           {collapsed ? (
             <PanelLeftOpen aria-hidden="true" className="h-5 w-5" />
@@ -73,11 +80,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           )}
         </button>
 
-        {/* TODO: ganti dengan nama admin yang sedang login */}
-        <div className="flex items-center gap-2 text-neutral-800">
-          <CircleUserRound aria-hidden="true" className="h-6 w-6 text-[#1B1B7A]" />
-          <span className="font-medium">Admin</span>
+        <div className="min-w-0 flex-1">
+          <p className="hidden truncate text-neutral-600 md:block">
+            {today}
+          </p>
         </div>
+
+        <AdminAccountMenu />
       </header>
 
       <main id="main-content" className="px-4 py-6 md:px-8 md:py-8">
