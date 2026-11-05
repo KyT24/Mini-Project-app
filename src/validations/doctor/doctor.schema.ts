@@ -31,7 +31,7 @@ const doctorBaseSchema = z.object({
     .regex(FEE_REGEX, 'Biaya harus angka 0 atau lebih, tanpa titik ribuan'),
   photo: z.string().trim().max(255, 'URL foto maksimal 255 karakter'),
   // '' = belum dipilih
-  specialist_id: z.string(),
+  category: z.string(),
   is_active: z.boolean(),
 });
 
@@ -56,7 +56,7 @@ export const EMPTY_DOCTOR_FORM: DoctorFormValues = {
   experience_years: '0',
   consultation_fee: '0',
   photo: '',
-  specialist_id: '',
+  category: '',
   is_active: true,
 };
 
@@ -69,7 +69,7 @@ function toPayload(data: BaseOutput): TDoctorUpdate {
     experience_years: Number(data.experience_years),
     consultation_fee: data.consultation_fee,
     photo: data.photo || null,
-    specialist_id: data.specialist_id || null,
+    category: data.category || null,
     is_active: data.is_active,
   };
 }

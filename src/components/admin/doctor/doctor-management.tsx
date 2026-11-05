@@ -134,7 +134,7 @@ export default function DoctorManagement() {
                     </div>
                   </div>
                 </th>
-                <td className="px-5 py-4">{doctor.specialists?.name ?? '-'}</td>
+                <td className="px-5 py-4">{doctor.category ?? '-'}</td>
                 <td className="px-5 py-4">{doctor.experience_years} tahun</td>
                 <td className="px-5 py-4">{formatRupiah(doctor.consultation_fee)}</td>
                 <td className="px-5 py-4">

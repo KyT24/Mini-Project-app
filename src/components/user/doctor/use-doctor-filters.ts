@@ -1,9 +1,10 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { categories } from '@/constants/treatments';
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback';
 import { FEE_RANGES } from './constants';
 
-type FilterKey = 'q' | 'specialist' | 'fee' | 'day' | 'page';
+type FilterKey = 'q' | 'category' | 'fee' | 'day' | 'page';
 
 // "3" → 3; kosong atau di luar 0–6 → undefined (semua hari)
 function parseDayOfWeek(value: string | null) {
@@ -19,11 +20,11 @@ export function useDoctorFilters() {
   const params = useSearchParams();
 
   const q = params.get('q') ?? '';
-  const specialist = params.get('specialist') ?? '';
+  const category = categories.find((item) => item === params.get('category')) ?? '';
   const fee = FEE_RANGES.find((range) => range.value === params.get('fee'));
   const dayOfWeek = parseDayOfWeek(params.get('day'));
   const page = Math.max(Number(params.get('page')) || 1, 1);
-  const hasFilter = Boolean(q || specialist || fee || dayOfWeek !== undefined);
+  const hasFilter = Boolean(q || category || fee || dayOfWeek !== undefined);
 
   function updateUrl(next: Partial<Record<FilterKey, string>>, resetPage = true) {
     const searchParams = new URLSearchParams(params.toString());
@@ -62,14 +63,14 @@ export function useDoctorFilters() {
 
   return {
     q,
-    specialist,
+    category,
     fee,
     dayOfWeek,
     page,
     hasFilter,
     search,
     changeSearch,
-    changeSpecialist: (value: string) => updateUrl({ specialist: value || undefined }),
+    changeCategory: (value: string) => updateUrl({ category: value || undefined }),
     changeFee: (value: string) => updateUrl({ fee: value || undefined }),
     changeDay: (value: string) => updateUrl({ day: value || undefined }),
     changePage: (next: number) => updateUrl({ page: String(next) }, false),

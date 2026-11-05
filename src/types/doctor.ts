@@ -18,12 +18,11 @@ export type TDoctor = {
   experience_years: number;
   consultation_fee: string; // Decimal dari Prisma dikirim sebagai string
   photo: string | null;
-  specialist_id: string | null;
+  category: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
   users: TDoctorUser;
-  specialists: { id: string; name: string } | null;
   // Hanya jadwal aktif, urut hari lalu jam
   doctor_schedules: Pick<
     TDoctorSchedule,
@@ -47,7 +46,7 @@ export type TDoctorIndex = {
   search?: string;
   is_active?: boolean;
   sort?: TDoctorSort;
-  specialist_id?: string;
+  category?: string;
   min_fee?: number;
   max_fee?: number;
   day_of_week?: number;
@@ -63,7 +62,7 @@ export type TDoctorCreate = {
   experience_years?: number;
   consultation_fee?: number | string;
   photo?: string | null;
-  specialist_id?: string | null;
+  category?: string | null;
   is_active?: boolean;
 };
 

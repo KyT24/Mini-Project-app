@@ -19,7 +19,7 @@ export function DoctorBrowser() {
     is_active: true,
     sort: 'experience_desc',
     search: filters.q || undefined,
-    specialist_id: filters.specialist || undefined,
+    category: filters.category || undefined,
     min_fee: filters.fee?.min_fee,
     max_fee: filters.fee?.max_fee,
     day_of_week: filters.dayOfWeek,
