@@ -1,11 +1,11 @@
+import Link from 'next/link';
 import { DoctorList } from '@/components/user/landing-page/doctor';
-import { waLink } from './constants';
 
 export function DoctorsSection() {
   return (
     <section
       aria-labelledby="doctors-heading"
-      className="mx-auto w-full max-w-6xl px-5 py-10 md:px-8 md:py-16"
+      className="mx-auto w-full max-w-6xl px-5 py-10 md:px-8 md:py-16 bg-white"
     >
       <h2
         id="doctors-heading"
@@ -17,7 +17,13 @@ export function DoctorsSection() {
         Perawatan ditangani langsung oleh dokter berpengalaman yang siap
         membantu mengenali kebutuhan kulitmu.
       </p>
-      <DoctorList waLink={waLink} />
+      <DoctorList />
+      <Link
+        href="/doctor"
+        className="mt-8 inline-flex min-h-11 items-center font-semibold text-[#1B1B7A] underline decoration-[#F29A9A] decoration-2 underline-offset-4 hover:text-[#d96a6a] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A]"
+      >
+        Lihat semua dokter
+      </Link>
     </section>
   );
 }

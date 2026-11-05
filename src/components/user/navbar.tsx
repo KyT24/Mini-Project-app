@@ -1,54 +1,48 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { LayoutDashboard } from 'lucide-react';
+import { useLogout, useMe } from '@/hooks/api/use-auth';
+import { useEscapeKey } from '@/hooks/use-escape-key';
+import { useLockBodyScroll } from '@/hooks/use-lock-body-scroll';
+import { AccountMenu, Avatar } from './account-menu';
 
 const links = [
   { href: '/', label: 'Beranda' },
   { href: '/treatment', label: 'Treatment' },
   { href: '/doctor', label: 'Our Doctor' },
+  { href: '/queue', label: 'Live Antrean' },
 ];
 
-export type NavbarUser = { name: string; avatarUrl?: string | null } | null;
-
-// Foto profil; kalau belum punya foto, tampilkan inisial nama.
-function Avatar({
-  user,
-  size,
-}: {
-  user: NonNullable<NavbarUser>;
-  size: string;
-}) {
-  const initials = user.name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join('');
-  return user.avatarUrl ? (
-    <img
-      src={user.avatarUrl}
-      alt=""
-      className={`${size} rounded-full object-cover ring-2 ring-[#C5A46D]`}
-    />
-  ) : (
-    <span
-      aria-hidden="true"
-      className={`${size} grid place-items-center rounded-full bg-[#1B1B7A] text-sm font-bold text-white ring-2 ring-[#C5A46D]`}
-    >
-      {initials || 'U'}
-    </span>
-  );
-}
-
-// user = null  → belum login (tampil tombol "Masuk" ke /login)
-// user = {...} → sudah login (tampil foto profil ke /profile)
-export default function Navbar({ user = null }: { user?: NavbarUser }) {
+// Belum login → tombol "Masuk" ke /login
+// Sudah login → foto profil dengan menu akun (+ pintasan dashboard jika admin)
+export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const { data: me, isPending: isLoadingMe } = useMe();
+  const isAdmin = me?.role === 'ADMIN' || me?.role === 'STAFF';
+  const user = me
+    ? {
+        name: me.full_name,
+        email: me.email,
+        avatarUrl: me.profile_picture,
+        role: me.role,
+        isAdmin,
+      }
+    : null;
+
+  const { mutate: logout, isPending: isLoggingOut } = useLogout({
+    onSuccess: () => {
+      setOpen(false);
+      router.push('/');
+    },
+  });
 
   // Link aktif: "/" harus sama persis, sisanya juga cocok untuk sub-halaman
   // (mis. /treatment/acne-facial tetap menandai "Treatment").
@@ -65,32 +59,65 @@ export default function Navbar({ user = null }: { user?: NavbarUser }) {
 
   // Saat menu terbuka: kunci scroll halaman, tutup dengan Escape,
   // dan tutup otomatis kalau layar melebar sampai lg.
+  useLockBodyScroll(open);
+  useEscapeKey(open, () => {
+    setOpen(false);
+    buttonRef.current?.focus();
+  });
+
   useEffect(() => {
     if (!open) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setOpen(false);
-        buttonRef.current?.focus();
-      }
-    };
     const mq = window.matchMedia('(min-width: 1024px)');
-    const onChange = (e: MediaQueryListEvent) => {
-      if (e.matches) setOpen(false);
+    const onChange = (event: MediaQueryListEvent) => {
+      if (event.matches) setOpen(false);
     };
-
-    document.addEventListener('keydown', onKey);
     mq.addEventListener('change', onChange);
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      mq.removeEventListener('change', onChange);
-      document.body.style.overflow = '';
-    };
+    return () => mq.removeEventListener('change', onChange);
   }, [open]);
 
   const close = () => setOpen(false);
+
+  // Area akun: loading → sudah login (menu akun) → belum login (tombol Masuk)
+  let accountContent;
+  if (isLoadingMe) {
+    accountContent = (
+      <span
+        aria-hidden="true"
+        className="h-9 w-9 animate-pulse rounded-full bg-neutral-200 lg:order-last"
+      />
+    );
+  } else if (user) {
+    accountContent = (
+      <div className="flex items-center gap-3 lg:order-last">
+        {/* TOMBOL PINTASAN DASHBOARD ADMIN DI DESKTOP */}
+        {isAdmin && (
+          <Link
+            href="/admin/dashboard"
+            className="hidden lg:inline-flex items-center gap-1.5 rounded-full bg-[#1B1B7A] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#12125c] active:scale-95"
+            title="Buka Dashboard Panel Admin"
+          >
+            <LayoutDashboard className="h-3.5 w-3.5 text-emerald-400" />
+            <span>Dashboard Admin</span>
+          </Link>
+        )}
+
+        <AccountMenu
+          user={user}
+          onLogout={() => logout()}
+          isLoggingOut={isLoggingOut}
+        />
+      </div>
+    );
+  } else {
+    accountContent = (
+      <Link
+        href="/login"
+        className="inline-flex h-11 items-center rounded-full border-2 border-[#1B1B7A] px-4 text-sm font-bold text-[#1B1B7A] transition-colors hover:bg-[#1B1B7A] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] lg:order-last"
+      >
+        Masuk
+      </Link>
+    );
+  }
 
   return (
     <>
@@ -117,7 +144,6 @@ export default function Navbar({ user = null }: { user?: NavbarUser }) {
             onClick={close}
             className="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A]"
           >
-            {/* Monogram sementara. Ganti dengan <Image src="/logo.svg" .../> bila logo final sudah ada. */}
             <span
               aria-hidden="true"
               className="grid h-9 w-9 place-items-center rounded-full border-2 border-[#C5A46D] font-serif text-sm font-bold text-[#1B1B7A] outline-1 outline-offset-2 outline-[#C5A46D] lg:h-10 lg:w-10 lg:text-base"
@@ -131,53 +157,32 @@ export default function Navbar({ user = null }: { user?: NavbarUser }) {
 
           {/* LINK DESKTOP (lg+) */}
           <ul className="hidden items-center gap-8 lg:flex">
-            {links.map((l) => (
-              <li key={l.href}>
+            {links.map((link) => (
+              <li key={link.href}>
                 <Link
-                  href={l.href}
-                  aria-current={isActive(l.href) ? 'page' : undefined}
+                  href={link.href}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                   className={`relative rounded py-2 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B1B7A] after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-[#C5A46D] after:transition-opacity ${
-                    isActive(l.href)
+                    isActive(link.href)
                       ? 'text-[#1B1B7A] after:opacity-100'
                       : 'text-neutral-700 after:opacity-0 hover:text-[#1B1B7A]'
                   }`}
                 >
-                  {l.label}
+                  {link.label}
                 </Link>
               </li>
             ))}
           </ul>
 
           <div className="flex items-center gap-2">
-            {/* AKUN: foto profil → /profile, atau tombol Masuk → /login */}
-            {user ? (
-              <Link
-                href="/profile"
-                aria-label={`Profil ${user.name}`}
-                aria-current={
-                  pathname.startsWith('/profile') ? 'page' : undefined
-                }
-                className="grid h-11 w-11 place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] lg:order-last"
-              >
-                <Avatar
-                  user={user}
-                  size="h-9 w-9"
-                />
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="inline-flex h-11 items-center rounded-full border-2 border-[#1B1B7A] px-4 text-sm font-bold text-[#1B1B7A] transition-colors hover:bg-[#1B1B7A] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] lg:order-last"
-              >
-                Masuk
-              </Link>
-            )}
+            {/* AKUN: foto profil + menu, atau tombol Masuk → /login */}
+            {accountContent}
 
             {/* HAMBURGER (< lg), target sentuh 44px */}
             <button
               ref={buttonRef}
               type="button"
-              onClick={() => setOpen((o) => !o)}
+              onClick={() => setOpen((previous) => !previous)}
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? 'Tutup menu' : 'Buka menu'}
@@ -203,11 +208,31 @@ export default function Navbar({ user = null }: { user?: NavbarUser }) {
           </div>
         </nav>
 
+        {/* DRAWER MENU MOBILE (< lg) */}
         <div
           id="mobile-menu"
           hidden={!open}
           className="max-h-[calc(100svh-4rem)] overflow-y-auto border-t border-neutral-200 bg-[#FAF8F3] lg:hidden"
         >
+          {/* BANNER MENU DASHBOARD ADMIN DI MOBILE */}
+          {user && isAdmin && (
+            <div className="mx-auto w-full max-w-6xl px-5 pt-4 md:px-8">
+              <Link
+                href="/admin/dashboard"
+                onClick={close}
+                className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#1B1B7A] to-[#2E2E99] p-3.5 text-white shadow"
+              >
+                <span className="flex items-center gap-2.5 font-bold text-sm">
+                  <LayoutDashboard className="h-5 w-5 text-emerald-400" />
+                  <span>Dashboard Panel Admin</span>
+                </span>
+                <span className="rounded-lg bg-white/20 px-2 py-0.5 text-xs font-semibold">
+                  Masuk &rarr;
+                </span>
+              </Link>
+            </div>
+          )}
+
           {user && (
             <Link
               href="/profile"
@@ -223,27 +248,27 @@ export default function Navbar({ user = null }: { user?: NavbarUser }) {
                   {user.name}
                 </span>
                 <span className="block text-sm text-neutral-600">
-                  Lihat profil
+                  Edit profil
                 </span>
               </span>
             </Link>
           )}
 
           <ul className="mx-auto w-full max-w-6xl px-5 py-2 md:px-8">
-            {links.map((l) => (
+            {links.map((link) => (
               <li
-                key={l.href}
+                key={link.href}
                 className="border-b border-neutral-200 last:border-0"
               >
                 <Link
-                  href={l.href}
+                  href={link.href}
                   onClick={close}
-                  aria-current={isActive(l.href) ? 'page' : undefined}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
                   className={`flex items-center justify-between py-4 text-lg text-[#1B1B7A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] ${
-                    isActive(l.href) ? 'font-bold' : 'font-medium'
+                    isActive(link.href) ? 'font-bold' : 'font-medium'
                   }`}
                 >
-                  {l.label}
+                  {link.label}
                   <svg
                     width="18"
                     height="18"
@@ -263,8 +288,29 @@ export default function Navbar({ user = null }: { user?: NavbarUser }) {
             ))}
           </ul>
 
-          <div className="mx-auto w-full max-w-6xl px-5 pb-6 pt-2 md:px-8">
-          </div>
+          {user && (
+            <ul className="mx-auto w-full max-w-6xl border-t border-neutral-200 px-5 py-2 md:px-8">
+              <li className="border-b border-neutral-200">
+                <Link
+                  href="/history"
+                  onClick={close}
+                  className="flex items-center py-4 text-lg font-medium text-[#1B1B7A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A]"
+                >
+                  Riwayat treatment
+                </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => logout()}
+                  disabled={isLoggingOut}
+                  className="flex w-full items-center py-4 text-left text-lg font-medium text-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] disabled:opacity-60"
+                >
+                  {isLoggingOut ? 'Keluar...' : 'Keluar'}
+                </button>
+              </li>
+            </ul>
+          )}
         </div>
       </header>
 
