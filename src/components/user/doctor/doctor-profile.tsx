@@ -7,7 +7,7 @@ import { formatDate, formatRupiah, formatTime } from '@/lib/format';
 import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
 import { inputBase, primaryBtn, secondaryBtn } from '@/lib/styles';
 import RatingStars from '@/components/user/booking/rating-stars';
-import { isSpecialistForCategory, treatments } from '@/constants/treatments';
+import { treatments } from '@/constants/treatments';
 import { useGetDetailDoctor } from '@/hooks/api/use-doctors';
 import { DAYS, DAY_ORDER } from '@/lib/schedule';
 import { DoctorAvatar } from './doctor-avatar';
@@ -66,8 +66,8 @@ export function DoctorProfile() {
     items: schedules.filter((schedule) => schedule.day_of_week === day),
   })).filter((group) => group.items.length > 0);
   // Hanya treatment yang kategorinya sama dengan spesialisasi dokter ini
-  const doctorTreatments = treatments.filter((treatment) =>
-    isSpecialistForCategory(doctor.specialists?.name, treatment.category),
+  const doctorTreatments = treatments.filter(
+    (treatment) => treatment.category === doctor.category,
   );
   const canBook = scheduleDays.length > 0 && Boolean(treatmentSlug);
   const reviews = doctor.reviews ?? [];
@@ -81,7 +81,7 @@ export function DoctorProfile() {
         />
         <div className="min-w-0 sm:self-end">
           <p className="font-semibold text-[#963535]">
-            {doctor.specialists?.name ?? 'Dokter Umum'}
+            {doctor.category ?? 'Dokter Umum'}
           </p>
           <h1 className="mt-1 text-3xl font-bold leading-tight tracking-tight text-[#1B1B7A] wrap-break-word md:text-4xl lg:text-5xl">
             {doctor.full_name}

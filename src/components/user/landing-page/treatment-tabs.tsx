@@ -11,30 +11,7 @@ import { NAVY } from './constants';
 
 export function TreatmentTabs() {
   const [active, setActive] = useState<Category>('Acne & Scar');
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const visible = treatments.filter((treatment) => treatment.category === active);
-
-  function onKeyDown(event: React.KeyboardEvent, index: number) {
-    let next = index;
-    if (event.key === 'ArrowRight') {
-      next = (index + 1) % categories.length;
-    } else if (event.key === 'ArrowLeft') {
-      next = (index - 1 + categories.length) % categories.length;
-    } else if (event.key === 'Home') {
-      next = 0;
-    } else if (event.key === 'End') {
-      next = categories.length - 1;
-    } else {
-      return;
-    }
-    event.preventDefault();
-    setActive(categories[next]);
-    tabRefs.current[next]?.focus();
-    tabRefs.current[next]?.scrollIntoView({
-      block: 'nearest',
-      inline: 'nearest',
-    });
-  }
 
   return (
     <section className="mx-auto w-full max-w-6xl px-5 py-10 md:px-8 md:py-16">
@@ -54,17 +31,13 @@ export function TreatmentTabs() {
           const Icon = categoryIcons[category];
           return (
             <button
-              key={category}
-              ref={(el) => {
-                tabRefs.current[index] = el;
-              }}
+              key={index}
               role="tab"
               id={`tab-${index}`}
               aria-selected={selected}
               aria-controls="panel-treatments"
               tabIndex={selected ? 0 : -1}
               onClick={() => setActive(category)}
-              onKeyDown={(event) => onKeyDown(event, index)}
               className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B1B7A] sm:text-base md:px-6 md:py-3 md:text-lg ${
                 selected
                   ? 'border-[#1B1B7A] bg-[#1B1B7A] text-white shadow-md'

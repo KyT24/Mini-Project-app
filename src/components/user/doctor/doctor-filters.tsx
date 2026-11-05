@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useGetSpecialists } from '@/hooks/api/use-specialists';
+import { categories } from '@/constants/treatments';
 import { DAYS, DAY_ORDER } from '@/lib/schedule';
 import { inputBase, secondaryBtn } from '@/lib/styles';
 import { FEE_RANGES } from './constants';
@@ -12,17 +12,15 @@ const selectClass = `mt-2 ${inputBase} border-neutral-300`;
 const tabClass =
   '-mb-px flex min-h-11 items-center whitespace-nowrap border-b-2 font-semibold text-[#1B1B7A] transition-colors hover:border-[#963535] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#1B1B7A] motion-reduce:transition-none';
 
+const tabs = [
+  { id: '', name: 'Semua' },
+  ...categories.map((category) => ({ id: category, name: category })),
+];
+
 type Props = { filters: TDoctorFilters };
 
 // Tab spesialis + pencarian + filter biaya & hari di atas daftar dokter
 export function DoctorFilters({ filters }: Props) {
-  // Daftar spesialis hanya dipakai tab ini, jadi dimuat di sini
-  const specialistsQuery = useGetSpecialists({ limit: 100, is_active: true });
-  const tabs = [
-    { id: '', name: 'Semua' },
-    ...(specialistsQuery.data?.data ?? []),
-  ];
-
   // Di layar ponsel, filter biaya & hari dilipat agar daftar dokter cepat terlihat
   const [showMore, setShowMore] = useState(false);
   const activeMore = (filters.fee ? 1 : 0) + (filters.dayOfWeek === undefined ? 0 : 1);
@@ -31,16 +29,16 @@ export function DoctorFilters({ filters }: Props) {
     <search aria-label="Cari dan filter dokter">
       <ul
         aria-label="Filter spesialis"
-        className="-mx-5 flex gap-x-6 overflow-x-auto border-b border-[#1B1B7A]/15 px-5 md:mx-0 md:gap-x-8 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="-mx-5 flex gap-x-6 overflow-x-auto border-b border-[#1B1B7A]/15 px-5 md:mx-0 md:gap-x-8 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-width:none"
       >
         {tabs.map((tab) => {
-          const isActive = filters.specialist === tab.id;
+          const isActive = filters.category === tab.id;
           return (
             <li key={tab.id} className="shrink-0">
               <button
                 type="button"
                 aria-pressed={isActive}
-                onClick={() => filters.changeSpecialist(tab.id)}
+                onClick={() => filters.changeCategory(tab.id)}
                 className={`${tabClass} ${isActive ? 'border-[#963535]' : 'border-transparent'}`}
               >
                 {tab.name}

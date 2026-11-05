@@ -8,7 +8,7 @@ import { useCreateAppointment, useGetAvailability } from '@/hooks/api/use-appoin
 import { useGetDoctors } from '@/hooks/api/use-doctors';
 import { card, errorText, inputBase, primaryBtn, secondaryBtn } from '@/lib/styles';
 import { formatDate } from '@/lib/format';
-import { isSpecialistForCategory, type Category } from '@/constants/treatments';
+import type { Category } from '@/constants/treatments';
 import { getBookableDates } from './utils';
 
 type Props = {
@@ -34,9 +34,7 @@ export default function BookingForm({ treatment }: Props) {
   const allDoctors = doctorsQuery.data?.data ?? [];
 
   // Hanya dokter yang spesialisasinya sama dengan kategori treatment ini
-  const doctors = allDoctors.filter((doctor) =>
-    isSpecialistForCategory(doctor.specialists?.name, treatment.category),
-  );
+  const doctors = allDoctors.filter((doctor) => doctor.category === treatment.category);
 
   // Dokter dari link profil (?doctor=) yang bukan spesialis treatment ini diabaikan
   let doctorId = '';
@@ -236,7 +234,7 @@ export default function BookingForm({ treatment }: Props) {
             {doctors.map((doctor) => (
               <option key={doctor.id} value={doctor.id}>
                 {doctor.full_name}
-                {doctor.specialists ? ` · ${doctor.specialists.name}` : ''}
+                {doctor.category ? ` · ${doctor.category}` : ''}
               </option>
             ))}
           </select>

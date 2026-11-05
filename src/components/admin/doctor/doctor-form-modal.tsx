@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Modal from '@/components/ui/modal';
 import { errorText, inputBase, primaryBtn, secondaryBtn } from '@/components/admin/styles';
 import { useCreateDoctor, useUpdateDoctor, useUploadDoctorPhoto } from '@/hooks/api/use-doctors';
-import { useGetSpecialists } from '@/hooks/api/use-specialists';
+import { categories } from '@/constants/treatments';
 import type { TDoctor, TDoctorCreate } from '@/types/doctor';
 import {
   type DoctorFormValues,
@@ -17,7 +17,7 @@ import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
 import { compressImage } from '@/lib/compress-image';
 
 // Format sama dengan backend (upload.middleware.ts). Ukuran boleh lebih besar dari batas
-// backend (2 MB) karena foto dikompres dulu di browser sebelum diunggah
+// backend (20 MB) karena foto dikompres dulu di browser sebelum diunggah
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const PHOTO_MAX_SIZE = 20 * 1024 * 1024;
 
@@ -38,7 +38,7 @@ function toFormValues(doctor?: TDoctor): DoctorFormValues {
     experience_years: String(doctor.experience_years),
     consultation_fee: String(Number(doctor.consultation_fee)),
     photo: doctor.photo ?? '',
-    specialist_id: doctor.specialist_id ?? '',
+    category: doctor.category ?? '',
     is_active: doctor.is_active,
   };
 }
@@ -56,15 +56,6 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
   const createDoctor = useCreateDoctor();
   const updateDoctor = useUpdateDoctor();
   const uploadPhoto = useUploadDoctorPhoto();
-  // Pilihan spesialis aktif; spesialis dokter saat ini tetap tampil walau sudah nonaktif
-  const { data: specialistData, isPending: specialistsLoading } = useGetSpecialists({
-    limit: 100,
-    is_active: true,
-  });
-  const specialistOptions = specialistData?.data ?? [];
-  const currentSpecialist = doctor?.specialists;
-  const hasCurrentOption =
-    !currentSpecialist || specialistOptions.some((specialist) => specialist.id === currentSpecialist.id);
 
   // Submit dikunci selama foto masih diproses
   const isPending =
@@ -325,27 +316,22 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
           </div>
 
           <div>
-            <label htmlFor="doctor-specialist_id" className="font-semibold">
+            <label htmlFor="doctor-category" className="font-semibold">
               Spesialis <span className="font-normal text-neutral-600">(opsional)</span>
             </label>
             <select
-              {...fieldProps('specialist_id')}
-              value={values.specialist_id}
-              onChange={(event) => setField('specialist_id', event.target.value)}
+              {...fieldProps('category')}
+              value={values.category}
+              onChange={(event) => setField('category', event.target.value)}
             >
-              <option value="">
-                {specialistsLoading ? 'Memuat spesialis...' : 'Pilih spesialis'}
-              </option>
-              {!hasCurrentOption && currentSpecialist && (
-                <option value={currentSpecialist.id}>{currentSpecialist.name} (nonaktif)</option>
-              )}
-              {specialistOptions.map((specialist) => (
-                <option key={specialist.id} value={specialist.id}>
-                  {specialist.name}
+              <option value="">Pilih spesialis</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
                 </option>
               ))}
             </select>
-            {renderError('specialist_id')}
+            {renderError('category')}
           </div>
 
           <div>

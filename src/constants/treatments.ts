@@ -36,21 +36,21 @@ export const treatments: Treatment[] = [
     category: 'Acne & Scar',
   },
   {
-    slug: 'acne-laser-co2',
-    price: 1800000,
-    featured: true,
-    title: 'Acne Laser Co2',
-    description:
-      'Menggunakan energi cahaya berintensitas tinggi untuk mengangkat sel kulit mati dan mempercepat regenerasi kulit.',
-    category: 'Acne & Scar',
-  },
-  {
     slug: 'acne-facial',
     price: 250000,
     featured: true,
     title: 'Acne Facial',
     description:
       'Pengelupasan sel kulit mati, pemberian nutrisi, serta pelembapan untuk membuat kulit wajah lebih sehat.',
+    category: 'Acne & Scar',
+  },
+  {
+    slug: 'acne-laser-co2',
+    price: 1800000,
+    featured: true,
+    title: 'Acne Laser Co2',
+    description:
+      'Menggunakan energi cahaya berintensitas tinggi untuk mengangkat sel kulit mati dan mempercepat regenerasi kulit.',
     category: 'Acne & Scar',
   },
   {
@@ -143,16 +143,4 @@ export const featuredTreatments = treatments.filter((treatment) => treatment.fea
 
 export function getTreatmentBySlug(slug: string) {
   return treatments.find((treatment) => treatment.slug === slug);
-}
-
-// Samakan penulisan nama: "Acne And Scar", "acne & scar" → "acne and scar"
-function normalizeName(name: string) {
-  return name.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, ' ').trim();
-}
-
-// Spesialisasi dokter = kategori treatment yang ditangani (mis. spesialis "Acne And Scar"
-// menangani semua treatment kategori "Acne & Scar")
-export function isSpecialistForCategory(specialistName: string | undefined, category: Category) {
-  if (!specialistName) return false;
-  return normalizeName(specialistName) === normalizeName(category);
 }

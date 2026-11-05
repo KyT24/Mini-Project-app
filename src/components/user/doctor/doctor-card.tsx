@@ -23,7 +23,7 @@ export function DoctorCard({ doctor }: { doctor: TDoctor }) {
             </Link>
           </h3>
           <p className="mt-0.5 text-sm text-neutral-700">
-            {doctor.specialists?.name ?? 'Dokter Umum'}
+            {doctor.category ?? 'Dokter Umum'}
             {' · '}
             {doctor.experience_years} tahun pengalaman
           </p>
