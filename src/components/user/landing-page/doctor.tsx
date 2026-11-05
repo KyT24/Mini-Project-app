@@ -21,12 +21,12 @@ export function DoctorList() {
       <ul
         aria-busy="true"
         aria-label="Memuat data dokter"
-        className="mt-8 grid gap-5 sm:grid-cols-2 md:mt-10 md:gap-6 lg:grid-cols-4"
+        className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 md:mt-10 md:gap-6 lg:grid-cols-4"
       >
         {Array.from({ length: LIMIT }).map((_, index) => (
           <li
             key={index}
-            className="h-96 animate-pulse rounded-2xl bg-neutral-100 motion-reduce:animate-none md:rounded-3xl"
+            className="h-56 animate-pulse rounded-2xl bg-neutral-100 motion-reduce:animate-none"
           />
         ))}
       </ul>
@@ -60,7 +60,7 @@ export function DoctorList() {
   }
 
   return (
-    <ul className="mt-8 grid gap-5 sm:grid-cols-2 md:mt-10 md:gap-6 lg:grid-cols-4">
+    <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 md:mt-10 md:gap-6 lg:grid-cols-4">
       {doctors.map((doctor) => (
         <li key={doctor.id}>
           <DoctorCard doctor={doctor} />
