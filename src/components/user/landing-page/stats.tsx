@@ -13,12 +13,6 @@ export function Stats() {
             key={stat.label}
             className="relative isolate flex min-h-52 items-center justify-center overflow-hidden bg-[#2b2f94] px-5 py-10 text-white md:min-h-96 md:px-3 md:py-14"
           >
-            <img
-              src={stat.image}
-              alt=""
-              loading="lazy"
-              className="absolute inset-0 -z-20 h-full w-full object-cover"
-            />
             <div
               aria-hidden="true"
               className="absolute inset-0 -z-10 bg-linear-to-b from-[#1B1B7A]/50 via-[#1B1B7A]/70 to-[#1B1B7A]/95"
