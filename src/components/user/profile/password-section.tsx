@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useChangePassword } from '@/hooks/api/use-auth';
+import { getApiErrorMessage, getApiStatus } from '@/lib/api-error';
 import { card, primaryBtn, secondaryBtn } from '@/lib/styles';
+import { firstError, passwordField } from '@/validations/shared/fields';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Field } from '@/components/ui/field';
 
@@ -20,15 +23,28 @@ export function PasswordSection() {
   const [errors, setErrors] = useState<PasswordErrors>({});
   const [status, setStatus] = useState('');
   const [serverError, setServerError] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
+
+  const { mutate: changePassword, isPending: isSaving } = useChangePassword({
+    onSuccess: () => {
+      resetForm();
+      setStatus('Password berhasil diubah.');
+    },
+    onError: (error) => {
+      const httpStatus = getApiStatus(error);
+      if (httpStatus === 400) setServerError('Password saat ini salah.');
+      else if (httpStatus === 401) setServerError('Sesi Anda berakhir. Silakan masuk kembali.');
+      else setServerError(getApiErrorMessage(error, 'Password gagal diubah. Silakan coba lagi.'));
+    },
+  });
 
   function validate(): PasswordErrors {
     const newErrors: PasswordErrors = {};
     if (!currentPassword) newErrors.current = 'Password saat ini wajib diisi';
+    const nextError = firstError(passwordField.safeParse(newPassword));
     if (!newPassword) {
       newErrors.next = 'Password baru wajib diisi';
-    } else if (newPassword.length < 8) {
-      newErrors.next = 'Password minimal 8 karakter';
+    } else if (nextError) {
+      newErrors.next = nextError;
     } else if (newPassword === currentPassword) {
       newErrors.next = 'Password baru harus berbeda dari password saat ini';
     }
@@ -47,7 +63,7 @@ export function PasswordSection() {
     setIsOpen(false);
   }
 
-  async function handleSubmit(event: React.FormEvent) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setServerError('');
     setStatus('');
@@ -56,17 +72,7 @@ export function PasswordSection() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    setIsSaving(true);
-    try {
-      // TODO: panggil API ubah password Anda di sini, contoh:
-      // await changePassword({ currentPassword, newPassword });
-      resetForm();
-      setStatus('Password berhasil diubah.');
-    } catch {
-      setServerError('Password gagal diubah. Periksa password saat ini lalu coba lagi.');
-    } finally {
-      setIsSaving(false);
-    }
+    changePassword({ current_password: currentPassword, new_password: newPassword });
   }
 
   function handleCancel() {
@@ -138,7 +144,7 @@ export function PasswordSection() {
                 value={newPassword}
                 onChange={setNewPassword}
                 autoComplete="new-password"
-                placeholder="Minimal 8 karakter"
+                placeholder="Minimal 8 karakter, huruf dan angka"
                 error={errors.next}
               />
             </Field>
