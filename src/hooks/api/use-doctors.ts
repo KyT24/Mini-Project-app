@@ -18,7 +18,6 @@ import type {
   TDoctorUpdate,
 } from '@/types/doctor';
 
-// GET /doctors
 export const useGetDoctors = (
   {
     page,
@@ -67,7 +66,6 @@ export const useGetDoctors = (
   });
 };
 
-// GET /doctors/:id
 export const useGetDetailDoctor = (id?: string) => {
   return useQuery<TApiSuccessResponse<TDoctor>>({
     enabled: Boolean(id),
@@ -79,7 +77,6 @@ export const useGetDetailDoctor = (id?: string) => {
   });
 };
 
-// POST /doctors
 export const useCreateDoctor = ({
   onError,
   onSuccess,
@@ -102,7 +99,6 @@ export const useCreateDoctor = ({
   });
 };
 
-// PATCH /doctors/:id
 export const useUpdateDoctor = ({
   onError,
   onSuccess,
@@ -146,7 +142,6 @@ export const useUploadDoctorPhoto = ({
   });
 };
 
-// DELETE /doctors/:id
 export const useDeleteDoctor = ({
   onError,
   onSuccess,

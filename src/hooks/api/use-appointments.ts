@@ -51,7 +51,6 @@ export const useGetMyAppointments = ({ page = 1, limit = 10 } = {}, enabled = tr
   });
 };
 
-// GET /appointments/:id
 export const useGetAppointment = (id?: string) => {
   return useQuery<TApiSuccessResponse<TAppointment>>({
     enabled: Boolean(id),

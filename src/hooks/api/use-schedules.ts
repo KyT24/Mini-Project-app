@@ -37,7 +37,6 @@ export const useGetSchedules = (doctorId?: string) => {
   });
 };
 
-// POST /schedules
 export const useCreateSchedule = ({
   onError,
   onSuccess,
@@ -59,7 +58,6 @@ export const useCreateSchedule = ({
   });
 };
 
-// PATCH /schedules/:id
 export const useUpdateSchedule = ({
   onError,
   onSuccess,
@@ -81,7 +79,6 @@ export const useUpdateSchedule = ({
   });
 };
 
-// DELETE /schedules/:id
 export const useDeleteSchedule = ({
   onError,
   onSuccess,

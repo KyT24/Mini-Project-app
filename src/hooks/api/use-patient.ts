@@ -7,7 +7,6 @@ import type {
 } from '@/types/api';
 import type { TPatient, TPatientUpdate } from '@/types/patient';
 
-// GET /patients/me
 export const useGetMyPatient = () => {
   return useQuery<TApiSuccessResponse<TPatient>>({
     queryKey: ['get-my-patient'],
@@ -19,7 +18,6 @@ export const useGetMyPatient = () => {
   });
 };
 
-// PATCH /patients/me
 export const useUpdateMyPatient = ({
   onError,
   onSuccess,

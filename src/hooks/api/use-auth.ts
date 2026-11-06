@@ -12,7 +12,6 @@ import type {
   TRegister,
 } from '@/types/auth';
 
-// POST /auth/login
 export const useLogin = ({
   onError,
   onSuccess,
@@ -34,7 +33,6 @@ export const useLogin = ({
   });
 };
 
-// POST /auth/register
 export const useRegister = ({
   onError,
   onSuccess,
@@ -90,7 +88,6 @@ export const useMe = () => {
   });
 };
 
-// POST /auth/logout
 export const useLogout = ({
   onError,
   onSuccess,
