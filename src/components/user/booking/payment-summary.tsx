@@ -7,7 +7,6 @@ type Props = {
   status: { label: string; className: string };
 };
 
-// Ringkasan reservasi (kode, treatment, dokter, jadwal, total) di halaman pembayaran
 export function PaymentSummary({ appointment, status }: Props) {
   const session = appointment.practice_sessions;
 

@@ -4,7 +4,6 @@ import { RegisterForm } from '@/components/user/auth/register-form';
 export default function RegisterPage() {
   return (
     <main className="min-h-screen bg-neutral-100 text-neutral-900 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      {/* PANEL BRAND */}
       <aside
         className="relative flex flex-col justify-between overflow-hidden bg-[#1B1B7A] px-6 py-10 text-white md:px-12 md:py-14 lg:py-20"
         style={{
@@ -64,7 +63,6 @@ export default function RegisterPage() {
         />
       </aside>
 
-      {/* FORM */}
       <section className="flex items-center justify-center px-5 py-10 md:px-10 md:py-14">
         <RegisterForm />
       </section>

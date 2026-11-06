@@ -96,7 +96,6 @@ export default function BookingForm({ treatment }: Props) {
 
   const describedBy = (field: keyof Errors) => (errors[field] ? `booking-${field}-error` : undefined);
 
-  // Pilihan jadwal: belum pilih dokter → loading → error → kosong → daftar jadwal
   let slotContent;
   if (!doctorId) {
     slotContent = (
@@ -210,7 +209,6 @@ export default function BookingForm({ treatment }: Props) {
       )}
 
       <div className="grid gap-6">
-        {/* DOKTER */}
         <div>
           <label htmlFor="booking-doctor" className="font-semibold">
             Pilih dokter
@@ -264,7 +262,6 @@ export default function BookingForm({ treatment }: Props) {
           )}
         </div>
 
-        {/* TANGGAL */}
         <div>
           <label htmlFor="booking-date" className="font-semibold">
             Tanggal
@@ -295,7 +292,6 @@ export default function BookingForm({ treatment }: Props) {
           )}
         </div>
 
-        {/* JADWAL & KUOTA */}
         <fieldset aria-describedby={describedBy('slot')}>
           <legend className="font-semibold">Pilih jadwal</legend>
           <p className="mt-1 text-sm text-neutral-600">

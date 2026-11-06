@@ -35,7 +35,6 @@ export default function LoginPage() {
         />
       </aside>
 
-      {/* FORM */}
       <section className="flex items-center justify-center px-5 py-10 md:px-10 md:py-14">
         {/* LoginForm membaca useSearchParams, wajib di dalam Suspense */}
         <Suspense>

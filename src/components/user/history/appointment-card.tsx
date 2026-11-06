@@ -11,14 +11,12 @@ type Props = {
   remaining: number;
 };
 
-// Satu kartu reservasi di halaman riwayat
 export function AppointmentCard({ appointment, remaining }: Props) {
   const waiting = appointment.status === 'waiting_payment' && remaining > 0;
   // Hold yang baru habis di browser ditampilkan kedaluwarsa sebelum data dimuat ulang
   const status = STATUS_META[appointment.status === 'waiting_payment' && !waiting ? 'expired' : appointment.status];
   const session = appointment.practice_sessions;
 
-  // Info di kiri tombol: sisa waktu bayar → rating yang sudah diberikan → kosong
   let statusInfo;
   if (waiting) {
     statusInfo = (
@@ -39,7 +37,6 @@ export function AppointmentCard({ appointment, remaining }: Props) {
     );
   }
 
-  // Teks tombol: masih bisa bayar → bisa diberi rating → lihat detail
   let actionLabel = 'Lihat detail';
   if (waiting) {
     actionLabel = 'Lanjutkan pembayaran';

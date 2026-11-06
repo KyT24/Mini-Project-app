@@ -28,7 +28,6 @@ export default async function TreatmentDetailPage({
 
   const Icon = categoryIcons[treatment.category];
 
-  // Treatment lain di kategori yang sama
   const related = treatments.filter(
     (item) => item.category === treatment.category && item.slug !== treatment.slug,
   );

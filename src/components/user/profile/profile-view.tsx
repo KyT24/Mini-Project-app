@@ -67,7 +67,6 @@ export function ProfileView() {
 
   return (
     <main className="min-h-screen bg-neutral-100 text-neutral-900">
-      {/* HEADER BRAND */}
       <header
         className="relative overflow-hidden bg-[#1B1B7A] pb-24 pt-8 text-white md:pt-10"
         style={{
@@ -93,7 +92,6 @@ export function ProfileView() {
       </header>
 
       <div className="relative mx-auto -mt-14 grid max-w-3xl gap-6 px-5 pb-14 md:px-8">
-        {/* RINGKASAN AKUN */}
         <section className={`${card} flex items-center gap-5`}>
           <div
             aria-hidden="true"
@@ -113,7 +111,6 @@ export function ProfileView() {
         <PasswordSection />
         <ReminderSection />
 
-        {/* KELUAR */}
         <p className="text-center text-neutral-600">
           Selesai? {/* TODO: ganti dengan fungsi logout Anda */}
           <Link href="/login" className={linkClass}>

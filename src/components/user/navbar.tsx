@@ -68,7 +68,6 @@ export default function Navbar() {
 
   const close = () => setOpen(false);
 
-  // Area akun: loading → sudah login (menu akun) → belum login (tombol Masuk)
   let accountContent;
   if (isLoadingMe) {
     accountContent = (
@@ -115,7 +114,6 @@ export default function Navbar() {
           aria-label="Navigasi utama"
           className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5 md:px-8 lg:h-20"
         >
-          {/* LOGO */}
           <Link
             href="/"
             onClick={close}
@@ -133,7 +131,6 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* LINK DESKTOP (lg+) */}
           <ul className="hidden items-center gap-8 lg:flex">
             {links.map((link) => (
               <li key={link.href}>
@@ -153,10 +150,9 @@ export default function Navbar() {
           </ul>
 
           <div className="flex items-center gap-2">
-            {/* AKUN: foto profil + menu, atau tombol Masuk → /login */}
             {accountContent}
 
-            {/* HAMBURGER (< lg), target sentuh 44px */}
+            {/* Target sentuh 44px */}
             <button
               ref={buttonRef}
               type="button"

@@ -99,7 +99,6 @@ export default function Footer() {
           </ul>
         </section>
 
-        {/* SOSIAL MEDIA */}
         <section aria-label="Media sosial">
           <h2 className="text-lg font-bold">Ikuti kami</h2>
           <ul className="mt-4 grid gap-2">
@@ -167,7 +166,6 @@ export default function Footer() {
         </section>
       </div>
 
-      {/* BAR BAWAH */}
       <div className="border-t border-white/15">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-5 py-5 text-sm text-white/80 sm:flex-row md:px-8">
           <p>
