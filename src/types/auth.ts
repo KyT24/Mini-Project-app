@@ -30,3 +30,17 @@ export type TLoginResponse = {
   token: string;
   user: TAuthUser;
 };
+
+export type TForgotPassword = {
+  email: string;
+};
+
+export type TResetPassword = {
+  token: string;
+  new_password: string;
+};
+
+export type TChangePassword = {
+  current_password: string;
+  new_password: string;
+};

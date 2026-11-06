@@ -7,9 +7,12 @@ import type {
 } from '@/types/api';
 import type {
   TAuthUser,
+  TChangePassword,
+  TForgotPassword,
   TLogin,
   TLoginResponse,
   TRegister,
+  TResetPassword,
 } from '@/types/auth';
 
 export const useLogin = ({
@@ -106,6 +109,57 @@ export const useLogout = ({
       queryClient.setQueryData(['me'], null);
       onSuccess?.(response);
     },
+    onError: (error) => onError?.(error as TApiError),
+  });
+};
+
+export const useForgotPassword = ({
+  onError,
+  onSuccess,
+}: TMutationCallbacks<TApiSuccessResponse<Record<string, never>>> = {}) => {
+  return useMutation({
+    mutationKey: ['forgot-password'],
+    mutationFn: async (body: TForgotPassword) => {
+      const { data } = await axiosInstance.post<
+        TApiSuccessResponse<Record<string, never>>
+      >('/auth/forgot-password', body);
+      return data;
+    },
+    onSuccess: (response) => onSuccess?.(response),
+    onError: (error) => onError?.(error as TApiError),
+  });
+};
+
+export const useResetPassword = ({
+  onError,
+  onSuccess,
+}: TMutationCallbacks<TApiSuccessResponse<Record<string, never>>> = {}) => {
+  return useMutation({
+    mutationKey: ['reset-password'],
+    mutationFn: async (body: TResetPassword) => {
+      const { data } = await axiosInstance.post<
+        TApiSuccessResponse<Record<string, never>>
+      >('/auth/reset-password', body);
+      return data;
+    },
+    onSuccess: (response) => onSuccess?.(response),
+    onError: (error) => onError?.(error as TApiError),
+  });
+};
+
+export const useChangePassword = ({
+  onError,
+  onSuccess,
+}: TMutationCallbacks<TApiSuccessResponse<Record<string, never>>> = {}) => {
+  return useMutation({
+    mutationKey: ['change-password'],
+    mutationFn: async (body: TChangePassword) => {
+      const { data } = await axiosInstance.patch<
+        TApiSuccessResponse<Record<string, never>>
+      >('/auth/password', body);
+      return data;
+    },
+    onSuccess: (response) => onSuccess?.(response),
     onError: (error) => onError?.(error as TApiError),
   });
 };

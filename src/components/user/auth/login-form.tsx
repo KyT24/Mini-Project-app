@@ -30,6 +30,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const justRegistered = searchParams.get('registered') === '1';
+  const justReset = searchParams.get('reset') === '1';
   const redirectTo = safeRedirect(searchParams.get('redirect'));
 
   const [email, setEmail] = useState('');
@@ -78,6 +79,15 @@ export function LoginForm() {
           className="mt-5 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-900"
         >
           Pendaftaran berhasil. Silakan masuk dengan akun Anda.
+        </div>
+      )}
+
+      {justReset && !serverError && (
+        <div
+          role="status"
+          className="mt-5 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-900"
+        >
+          Password berhasil diubah. Silakan masuk dengan password baru.
         </div>
       )}
 
