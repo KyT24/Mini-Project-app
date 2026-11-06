@@ -21,7 +21,6 @@ export function getTotalPages(meta?: TPaginateMeta) {
   return Math.max(meta?.total_pages ?? 1, 1);
 }
 
-// Navigasi halaman sebelumnya/berikutnya untuk daftar berpaginasi
 export function Pagination({
   label,
   page,

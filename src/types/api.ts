@@ -20,7 +20,6 @@ export type TPaginateResponse<T> = TApiSuccessResponse<T[]> & {
 
 export type TApiError = AxiosError<{ message?: string }>;
 
-// Callback opsional untuk hook mutation
 export type TMutationCallbacks<T = unknown> = {
   onSuccess?: (data: T) => void;
   onError?: (error: TApiError) => void;

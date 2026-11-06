@@ -1,9 +1,8 @@
 /** "Dirga Saputra" → "DS" */
 export function getInitials(name: string) {
-  const words = name.trim().split(/\s+/); // "Dirga Saputra" → ["Dirga", "Saputra"]
+  const words = name.trim().split(/\s+/);
   const firstTwoWords = words.slice(0, 2);
   const initials = firstTwoWords.map((word) => word[0]).join('').toUpperCase();
-  // Nama kosong → tampilkan "?"
   return initials || '?';
 }
 
@@ -38,7 +37,6 @@ export function formatTime(time: string) {
 export function formatCountdown(seconds: number) {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  // padStart menambah 0 di depan: "2" → "02"
   const mm = String(minutes).padStart(2, '0');
   const ss = String(remainingSeconds).padStart(2, '0');
   return `${mm}:${ss}`;

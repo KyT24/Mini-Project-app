@@ -15,7 +15,6 @@ type Props = {
   hintId?: string;
 };
 
-// Input password dengan tombol "Tampilkan/Sembunyikan"
 export function PasswordInput({
   id,
   value,
