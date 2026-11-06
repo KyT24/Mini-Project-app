@@ -10,11 +10,8 @@ export function getInitials(name: string) {
 export function formatRupiah(value: string | number) {
   const amount = Number(value);
   if (Number.isNaN(amount)) return '-';
-  return amount.toLocaleString('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  });
+  // Prefix ditulis manual: style 'currency' beda spasi antara Node dan browser (hydration error)
+  return `Rp${amount.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`;
 }
 
 /** "2026-10-26" atau ISO tanggal dari backend → "Senin, 26 Oktober 2026" */
