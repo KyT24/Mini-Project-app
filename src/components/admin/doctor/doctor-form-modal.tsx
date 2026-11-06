@@ -175,7 +175,6 @@ export default function DoctorFormModal({ doctor, onClose, onSuccess }: Props) {
     }
   }
 
-  // Teks tombol simpan: sedang menyimpan → mode ubah → mode tambah
   let submitLabel = 'Tambah dokter';
   if (isPending) {
     submitLabel = 'Menyimpan...';

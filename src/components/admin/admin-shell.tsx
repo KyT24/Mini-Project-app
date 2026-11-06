@@ -53,7 +53,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         onCloseMobile={() => setMobileOpen(false)}
       />
 
-      {/* TOP BAR */}
       <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-neutral-200 bg-white px-3 md:gap-4 md:px-6">
         <button
           type="button"

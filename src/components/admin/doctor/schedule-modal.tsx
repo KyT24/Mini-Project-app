@@ -31,10 +31,8 @@ type Props = {
 const dayRank = (day: number) => DAY_ORDER.indexOf(day as (typeof DAY_ORDER)[number]);
 const sortSchedules = (items: TDoctorSchedule[]) =>
   [...items].sort((scheduleA, scheduleB) => {
-    // Beda hari: urutkan berdasarkan hari
     const dayDifference = dayRank(scheduleA.day_of_week) - dayRank(scheduleB.day_of_week);
     if (dayDifference !== 0) return dayDifference;
-    // Hari sama: urutkan berdasarkan jam mulai ("08:00" < "13:00")
     return scheduleA.start_time.localeCompare(scheduleB.start_time);
   });
 
@@ -173,7 +171,6 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
     });
   }
 
-  // Daftar jadwal: loading → error → kosong → data
   let scheduleListContent;
   if (schedulesQuery.isPending) {
     scheduleListContent = (
@@ -294,7 +291,6 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
         </div>
       )}
 
-      {/* DAFTAR JADWAL */}
       <section aria-labelledby="schedule-list-heading">
         <h3 id="schedule-list-heading" className="font-bold text-[#1B1B7A]">
           Jadwal praktik mingguan
@@ -302,7 +298,6 @@ export default function ScheduleModal({ doctor, onClose, onSuccess }: Props) {
         {scheduleListContent}
       </section>
 
-      {/* FORM TAMBAH / UBAH */}
       <form
         onSubmit={handleSubmit}
         noValidate

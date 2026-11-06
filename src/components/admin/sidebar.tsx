@@ -74,7 +74,6 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile }: Props)
         collapsed ? 'lg:w-20' : 'lg:w-64'
       } ${mobileOpen ? 'visible translate-x-0' : 'invisible -translate-x-full'}`}
     >
-      {/* BRAND */}
       <div className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-neutral-200 px-4">
         <Link
           href="/admin/dashboard"
@@ -96,7 +95,6 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile }: Props)
         </button>
       </div>
 
-      {/* MENU */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         {NAV_GROUPS.map((group, index) => {
           const headingId = `admin-nav-${index}`;
@@ -141,7 +139,6 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile }: Props)
         })}
       </nav>
 
-      {/* BAWAH */}
       <div className="grid shrink-0 gap-1 border-t border-neutral-200 p-3">
         <Link
           href="/"

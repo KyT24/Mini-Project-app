@@ -45,7 +45,6 @@ export default function PaymentManagement() {
     }
   }
 
-  // Isi tabel: loading → error → kosong → data
   let tableContent;
   if (isPending) {
     tableContent = (
@@ -152,7 +151,6 @@ export default function PaymentManagement() {
         )}
       </div>
 
-      {/* FILTER */}
       <div className="mt-6 rounded-3xl border border-neutral-200 bg-white p-5 md:max-w-sm">
         <label htmlFor="payment-status" className="font-semibold">
           Status
@@ -175,12 +173,10 @@ export default function PaymentManagement() {
         </select>
       </div>
 
-      {/* TABEL */}
       <div className="mt-6 overflow-hidden rounded-3xl border border-neutral-200 bg-white">
         {tableContent}
       </div>
 
-      {/* PAGINASI */}
       {meta && meta.total > 0 && (
         <Pagination
           label="Paginasi daftar transaksi"

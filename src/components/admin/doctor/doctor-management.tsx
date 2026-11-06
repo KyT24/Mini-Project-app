@@ -63,7 +63,6 @@ export default function DoctorManagement() {
     }
   }
 
-  // Isi tabel: loading → error → kosong → data
   let tableContent;
   if (isPending) {
     tableContent = (
@@ -208,7 +207,6 @@ export default function DoctorManagement() {
         )}
       </div>
 
-      {/* FILTER */}
       <div className="mt-6 grid gap-4 rounded-3xl border border-neutral-200 bg-white p-5 md:grid-cols-[2fr_1fr_1fr]">
         <div>
           <label htmlFor="doctor-search" className="font-semibold">
@@ -266,12 +264,10 @@ export default function DoctorManagement() {
         </div>
       </div>
 
-      {/* TABEL */}
       <div className="mt-6 overflow-hidden rounded-3xl border border-neutral-200 bg-white">
         {tableContent}
       </div>
 
-      {/* PAGINASI */}
       {meta && meta.total > 0 && (
         <Pagination
           label="Paginasi daftar dokter"
